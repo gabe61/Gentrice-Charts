@@ -1,4 +1,4 @@
-var env = "test";
+var env = "prod";
 
 var chart_pool = {};
 var chart_config = {};
