@@ -252,12 +252,12 @@ $quick_filter = array(
 	include("inc/footer.php");
 ?>
 
-<?php 
+<?php
 	//include required scripts
-	include("inc/scripts.php"); 
+	include("inc/scripts.php");
 ?>
 
-<!-- PAGE RELATED PLUGIN(S) 
+<!-- PAGE RELATED PLUGIN(S)
 <script src="..."></script>-->
 <!-- Flot Chart Plugin: Flot Engine, Flot Resizer, Flot Tooltip -->
 <script src="<?php echo ASSETS_URL; ?>/js/plugin/flot/jquery.flot.cust.min.js"></script>
@@ -290,7 +290,7 @@ $quick_filter = array(
 
 </script>
 
-<?php 
+<?php
 	//include footer
-	include("inc/google-analytics.php"); 
+	include("inc/google-analytics.php");
 ?>
