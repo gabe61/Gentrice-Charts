@@ -1,5 +1,3 @@
-var env = "test";
-
 var chart_pool = {};
 var chart_config = {};
 

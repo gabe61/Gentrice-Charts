@@ -58,6 +58,10 @@ $quick_filter = array(
 <script>
     var base_url = '<?php echo ASSETS_URL; ?>';
 </script>
+<script>
+    var env = ('<?php echo parse_ini_file(".env", true)['environment'];?>');
+
+</script>
 <!-- ==========================CONTENT STARTS HERE ========================== -->
 <!-- MAIN PANEL -->
 <div id="main" role="main">

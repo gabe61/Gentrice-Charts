@@ -21,3 +21,9 @@ https://getcomposer.org
     composer install
 - restart apache web server
 ```
+
+#4. Setup Environment
+```$xslt
+open .env
+change to environment=prod
+```
