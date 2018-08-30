@@ -72,25 +72,31 @@ include("inc/nav.php");
 				<!-- NEW WIDGET START -->
 				<article class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                     <div>
-                        <table id="jqgrid"></table>
-                        <div id="pjqgrid"></div>
+                        <table id="src-ip"></table>
+                        <div id="pjqgrid_src_ip"></div>
                     </div>
                     <div style="margin-top: 20px;">
-                        <table id="jqgrid2"></table>
-                        <div id="pjqgrid2"></div>
+                        <table id="desc-ip"></table>
+                        <div id="pjqgrid_desc_ip"></div>
                     </div>
 
                 </article>
                 <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6">
                     <div>
-                        <table id="jqgrid1"></table>
-                        <div id="pjqgrid1"></div>
+                        <table id="src-port"></table>
+                        <div id="pjqgrid_src_port"></div>
                     </div>
                     <div style="margin-top: 20px;">
-                        <table id="jqgrid3"></table>
-                        <div id="pjqgrid3"></div>
+                        <table id="desc-port"></table>
+                        <div id="pjqgrid_desc_port"></div>
                     </div>
 				</article>
+                <article class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <div>
+                        <table id="protocol"></table>
+                        <div id="pjqgrid_protocol"></div>
+                    </div>
+                </article>
 				<!-- WIDGET END -->
 				
 			</div>
@@ -122,154 +128,7 @@ include("inc/nav.php");
 
 <script src="<?php echo ASSETS_URL; ?>/js/plugin/jqgrid/jquery.jqGrid.min.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/plugin/jqgrid/grid.locale-en.min.js"></script>
-
-<script type="text/javascript">
-	$(document).ready(function() {
-
-		var jqgrid_data = [{
-			id : "1",
-            source : "53.32.111.221",
-            mb : "test",
-            packets : "note",
-            records : "200.00"
-		}];
-
-		var mock_data_grid1 = [], mock_data_grid2 = [], mock_data_grid3 = [], mock_data_grid4 = [];
-		for(var i = 0; i < 1000; i ++) {
-            mock_data_grid1.push({
-                id : i,
-                source : "53.32.111."+parseInt(Math.random()*1000),
-                mb : (Math.random()*100).toFixed(3),
-                packets : (Math.random()*100000).toFixed(0),
-                records : (Math.random()*100222222).toFixed(0)
-            });
-            mock_data_grid2.push({
-                id : i,
-                source : "53.32.111."+parseInt(Math.random()*1000),
-                mb : (Math.random()*100).toFixed(3),
-                packets : (Math.random()*100000).toFixed(0),
-                records : (Math.random()*100222222).toFixed(0)
-            });
-            mock_data_grid3.push({
-                id : i,
-                source : parseInt(Math.random()*1000),
-                mb : (Math.random()*100).toFixed(3),
-                packets : (Math.random()*100000).toFixed(0),
-                records : (Math.random()*100222222).toFixed(0)
-            });
-            mock_data_grid4.push({
-                id : i,
-                source : parseInt(Math.random()*1000),
-                mb : (Math.random()*100).toFixed(3),
-                packets : (Math.random()*100000).toFixed(0),
-                records : (Math.random()*100222222).toFixed(0)
-            });
-        }
-
-		jQuery("#jqgrid").jqGrid({
-			data : mock_data_grid1,
-			datatype : "local",
-			height : 'auto',
-			colNames : ['Source', 'MB', 'Packets', 'Flow Records'],
-			colModel : [
-                // { name : 'id', index : 'id' },
-				{ name : 'source', index : 'source' },
-				{ name : 'mb', index : 'mb' },
-				{ name : 'packets', index : 'packets' },
-				{ name : 'records', index : 'records' }
-            ],
-			rowNum : 10,
-			rowList : [10, 20, 30],
-			pager : '#pjqgrid',
-			sortname : 'source',
-			toolbarfilter: true,
-			viewrecords : true,
-			sortorder : "asc",
-			caption : "Top Sources",
-			multiselect : true,
-			autowidth : true
-		});
-
-        jQuery("#jqgrid1").jqGrid({
-            data : mock_data_grid2,
-            datatype : "local",
-            height : 'auto',
-            colNames : ['Description', 'MB', 'Packets', 'Flow Records'],
-            colModel : [
-                // { name : 'id', index : 'id' },
-                { name : 'source', index : 'source' },
-                { name : 'mb', index : 'mb' },
-                { name : 'packets', index : 'packets' },
-                { name : 'records', index : 'records' }
-            ],
-            rowNum : 10,
-            rowList : [10, 20, 30],
-            pager : '#pjqgrid1',
-            sortname : 'source',
-            toolbarfilter: true,
-            viewrecords : true,
-            sortorder : "asc",
-            caption : "Top Description",
-            multiselect : true,
-            autowidth : true
-        });
-
-
-        jQuery("#jqgrid2").jqGrid({
-            data : mock_data_grid3,
-            datatype : "local",
-            height : 'auto',
-            colNames : ['Source', 'MB', 'Packets', 'Flow Records'],
-            colModel : [
-                // { name : 'id', index : 'id' },
-                { name : 'source', index : 'source' },
-                { name : 'mb', index : 'mb' },
-                { name : 'packets', index : 'packets' },
-                { name : 'records', index : 'records' }
-            ],
-            rowNum : 10,
-            rowList : [10, 20, 30],
-            pager : '#pjqgrid2',
-            sortname : 'source',
-            toolbarfilter: true,
-            viewrecords : true,
-            sortorder : "asc",
-            caption : "Top Sources Ports",
-            multiselect : true,
-            autowidth : true
-        });
-
-
-        jQuery("#jqgrid3").jqGrid({
-            data : mock_data_grid4,
-            datatype : "local",
-            height : 'auto',
-            colNames : ['Description', 'MB', 'Packets', 'Flow Records'],
-            colModel : [
-                // { name : 'id', index : 'id' },
-                { name : 'source', index : 'source' },
-                { name : 'mb', index : 'mb' },
-                { name : 'packets', index : 'packets' },
-                { name : 'records', index : 'records' }
-            ],
-            rowNum : 10,
-            rowList : [10, 20, 30],
-            pager : '#pjqgrid3',
-            sortname : 'source',
-            toolbarfilter: true,
-            viewrecords : true,
-            sortorder : "asc",
-            caption : "Top Description Ports",
-            multiselect : true,
-            autowidth : true
-        });
-	});
-
-	$(window).on('resize.jqGrid', function () {
-		$("#jqgrid").jqGrid( 'setGridWidth', '50%' );
-	})
-
-</script>
+<script src="<?php echo ASSETS_URL; ?>/js/dashboard-table.js"></script>
 
 
 <?php 

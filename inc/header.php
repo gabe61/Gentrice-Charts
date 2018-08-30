@@ -36,8 +36,7 @@
 				}
 			}
 		?>
-
-
+		
 		<!-- Demo purpose only: goes with demo.js, you can delete this css when designing your own WebApp -->
 		<link rel="stylesheet" type="text/css" media="screen" href="<?php echo ASSETS_URL; ?>/css/demo.min.css">
 
@@ -70,6 +69,8 @@
 			if (!window.jQuery) {
 				document.write('<script src="<?php echo ASSETS_URL; ?>/js/libs/jquery-3.2.1.min.js"><\/script>');
 			}
+			var base_url = '<?php echo ASSETS_URL; ?>';
+			var env = ('<?php echo parse_ini_file(".env", true)['environment'];?>');
 		</script>
 
 		<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
@@ -78,7 +79,6 @@
 				document.write('<script src="<?php echo ASSETS_URL; ?>/js/libs/jquery-ui.min.js"><\/script>');
 			}
 		</script>
-
 
 	</head>
 	<body <?php echo implode(' ', array_map(function($prop, $value) {
