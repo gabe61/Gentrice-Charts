@@ -125,8 +125,18 @@ function render_top5(response, day) {
     var res_top5 = response.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets;
     var graph = res_top5[0].time_buckets.buckets;
     var all_values = [];
-    var interval = graph.length > 0 && graph[0].length >= 2 ? (graph[0][1].key - graph[0][0].key) / 1000 : default_interval;
+    // 
+    var ts = 0;
+    if (_default_interval.indexOf('m') > -1) {
+        ts = 60 * parseInt(_default_interval.substr(0, _default_interval.length - 1)) * 1000;
+    } else if (_default_interval.indexOf('h') > -1) {
+        ts = 60 * 60 * parseInt(_default_interval.substr(0, _default_interval.length - 1)) * 1000;
+    } else {
+        ts = parseInt(_default_interval.substr(0, _default_interval.length - 1)) * 1000;
+    }
 
+    var interval = graph.length > 0 && graph[0].length >= 2 ? (graph[0][1].key - graph[0][0].key) / 1000 : ts;
+    
     for (var j = 0; j < graph.length; j++) {
         var timedata = {};
         timedata["date"] = new Date(graph[j].key);

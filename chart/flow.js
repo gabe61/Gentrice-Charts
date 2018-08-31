@@ -50,7 +50,21 @@ chart_config.flow = {
         },
         "fillOpacity": "0.3",
         "stroke": "#e59165",
-        "fill": "#e59165",
+        // "fill": "red",
+        "fill": {
+          "type": "RadialGradient",
+          "stops": [{
+            "color": "red"
+          }, {
+            "color": "blue"
+          }, {
+            "color": "green"
+          }, {
+            "color": "yellow"
+          }, {
+            "color": "red"
+          }]
+        }
     }],
 
     // Add cursor

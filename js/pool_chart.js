@@ -104,7 +104,14 @@ function refresh_widgets() {
         fullscreenButton: true,
         fullscreenClass: 'fa fa-expand | fa fa-compress',
         fullscreenDiff: 3,
-        onFullscreen: function () {},
+        onFullscreen: function (container) {
+            if($('#jarviswidget-fullscreen-mode').is('div') === true) {
+                container.find('.widget-body').height('100%');
+            }
+            else {
+                container.find('.widget-body').height(300);
+            }
+        },
         // custom btn
         customButton: false,
         customClass: 'folder-10 | next-10',
@@ -133,7 +140,6 @@ function refresh_widgets() {
         afterLoad: function () {},
         rtl: false, // best not to toggle this!
         onChange: function () {
-
         },
         onSave: function () {
 
@@ -142,10 +148,22 @@ function refresh_widgets() {
     });
 }
 function create_chart_widget(chart_id) {
-    $('#chart-widgets-container').children('article.'+chart_id+'_panel').append('<div class="jarviswidget" data-widget-editbutton="false" data-widget-deletebutton="false" id="chart-widget-'+chart_id+'">\n' +
+    var chart_container = $('#chart-widgets-container');
+    var widget_container = '';
+
+    var article1 = chart_container.children('article:first');
+    var article2 = chart_container.children('article:last');
+    if(article1.children().length <= article2.children().length) {
+        widget_container = article1;
+    }
+    else {
+        widget_container = article2;
+    }
+
+    widget_container.append('<div class="jarviswidget" data-widget-editbutton="false" data-widget-deletebutton="false" id="chart-widget-'+chart_id+'">\n' +
         '                        <header><h2><strong>'+chart_id.toUpperCase()+'</strong> <i>chart</i></h2></header>' +
-        '                        <div>' +
-        '                            <div class="widget-body" style="height: 100%; min-height: 500px;"><div id="chart_'+chart_id+'" style="min-height: 500px;height: 100%"></div></div>' +
+        '                        <div style="height: 100%;">' +
+        '                            <div class="widget-body" style="height: 300px;"><div id="chart_'+chart_id+'" style="height: 100%"></div></div>' +
         '                        </div>'+
         '                    </div>');
     create_chart(chart_id);
@@ -382,6 +400,8 @@ function set_new_timerange(time_range, text, from, to) {
         if(chart_pool.top5) create_chart('top5');
     }
     window.localStorage.setItem('range_current', time_range);
+
+    $('#chart-filter-panel').hide(0);
 }
 function remove_recent_cate(btn, time_range) {
     $(btn).closest('.btn-group').remove();
@@ -472,12 +492,13 @@ $(function() {
     $('#btn-chart-filter').click(function() {
         var container = $('#chart-filter-panel');
         if(container.css('display') === 'block') {
-            container.stop(true, true).slideUp();
+            container.stop(true, true).fadeOut();
         }
         else {
-            container.stop(true, true).slideDown();
+            container.stop(true, true).fadeIn();
         }
     });
+
     $('#chart-filter-panel').hide(0);
     $('#time-range').find('a').click(function() {
         var range_cate = this.getAttribute('value');
@@ -509,6 +530,7 @@ $(function() {
         }
         //store range category
         set_new_timerange(range_cate, this.textContent);
+        $('#chart-filter-panel').hide(0);
     });
 
     $('div[type]').find('input,select').change(function() {
@@ -560,14 +582,62 @@ $(function() {
         area.data('date', calc_date);
         area.find('.calculated-time').text(calc_date.toString().substring(0, calc_date.toString().indexOf('GMT')));
     });
+
+    $('#datetimepicker_from, #datetimepicker_to').datetimepicker({
+        inline: true,
+        sideBySide: true
+    });
 });
+
+function go_from_to(from, to, text) {
+    var range_recents = window.localStorage.getItem('range_recent');
+    $('#btn-chart-filter').text(text);
+
+    window.localStorage.setItem('range_current', JSON.stringify({from: from, to: to}));
+    
+    window.localStorage.setItem('range_current_text', text);
+
+    if(!range_recents) range_recents = [];
+    else range_recents = JSON.parse(range_recents);
+    var flag_addrecent = true;
+    var each_range;
+
+    var new_each_range = (from + to).toString(16);
+    for(each_range of range_recents) {
+        if(each_range.time_range === new_each_range) {
+            flag_addrecent = false;
+            break;
+        }
+    }
+    if(flag_addrecent === true) {
+        range_recents.push({
+            time_range: new_each_range,
+            text: text,
+            to: to,
+            from: from
+        });
+
+        //register_time_range
+        window.localStorage.setItem('range_recent', JSON.stringify(range_recents));
+        set_recent_category();
+
+        zoomIn(from, to);
+    }
+    $('#chart-filter-panel').hide(0);
+}
 
 function time_range_render_chart() {
     var dom_from = $('div[type="from"]');
     var dom_to = $('div[type="to"]');
 
-    var from = dom_from.data('date').getTime();
-    var to = dom_to.data('date').getTime();
+    var from = dom_from.data('date');
+    var to = dom_to.data('date');
+    if(!from || !to) {
+        alert('Input time range value.');
+        return false;
+    }
+    from = from.getTime();
+    to = to.getTime();
 
     if(!from || !to) {
         alert('Invalid time range.');
@@ -583,42 +653,33 @@ function time_range_render_chart() {
         else {
             var text = '~ '+dom_from.find('input[type="number"]').val() +' '+dom_from.find('span').text()
                 + 's ago to ~ in '
-                + dom_to.find('input[type="number"]').val() +' '+ dom_to.find('span').text() + 's ago';
+                + dom_to.find('input[type="number"]').val() +' '+ dom_to.find('span').text() + 's ago';            
 
-            var range_recents = window.localStorage.getItem('range_recent');
-
-            window.localStorage.setItem('range_current', JSON.stringify({from: from, to: to}));
-            $('#btn-chart-filter').text(text);
-            window.localStorage.setItem('range_current_text', text);
-
-            if(!range_recents) range_recents = [];
-            else range_recents = JSON.parse(range_recents);
-            var flag_addrecent = true;
-            var each_range;
-
-            var new_each_range = (from + to).toString(16);
-            for(each_range of range_recents) {
-                if(each_range.time_range === new_each_range) {
-                    flag_addrecent = false;
-                    break;
-                }
-            }
-            if(flag_addrecent === true) {
-                range_recents.push({
-                    time_range: new_each_range,
-                    text: text,
-                    to: to,
-                    from: from
-                });
-
-                //register_time_range
-                window.localStorage.setItem('range_recent', JSON.stringify(range_recents));
-                set_recent_category();
-
-                zoomIn(from, to);
-            }
+            go_from_to(from, to, text);
         }
     }
+}
+
+function absolute_time_range() {
+    var from = $('#datetimepicker_from').data('DateTimePicker').date().toDate();
+    var to = $('#datetimepicker_to').data('DateTimePicker').date().toDate();
+
+    var text = from.toString().substr(0, from.toString().indexOf(' GMT'))
+                + ' ~ '
+                + to.toString().substr(0, to.toString().indexOf(' GMT')); 
+
+    from = from.getTime();
+    to = to.getTime();
+
+    var diff = Math.floor((to - from) / defaultZoomPoints / 1000);
+    diff = diff == 0 ? 1 : diff;
+
+    if (to - from < diff * 20 * 1000) {
+        alert('Choise correctly range value!');
+        return;
+    }
+    
+    go_from_to(from, to, text);
 }
 
 function callAPI(apiurl, from, to, interval, graph, day) {
@@ -742,6 +803,7 @@ function callAPI(apiurl, from, to, interval, graph, day) {
                 for (var j = 0; j < 5; j++) {
                     y = Math.random() * 200000;
                     if (y >= 190000) y = y * 10;
+                    y *= 1000;
                     sample_json.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets[j].time_buckets.buckets.push({
                         "key_as_string": (i / 1000).toString(),
                         "key": i,

@@ -52,7 +52,7 @@ chart_config.in = {
 
         "fillOpacity": "0.3",
         "stroke": "#e59165",
-        "fill": "#e59165"
+        "fill": "green"
     }],
 
     // Add cursor

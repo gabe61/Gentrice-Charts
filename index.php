@@ -16,6 +16,7 @@ $page_title = "Dashboard";
 //you can add your custom css in $page_css array.
 //Note: all css files are inside css/ folder
 $page_css[] = "your_style.css";
+$page_css[] = "../js/datetime-picker/css/bootstrap-datetimepicker.min.css";
 include("inc/header.php");
 
 //include left panel (navigation)
@@ -28,6 +29,14 @@ $chart_pool = array(
 );
 $quick_filter = array(
     array(
+        '15m' => 'Last 15 minutes',
+        '30m' => 'Last 30 minutes',
+        '1h' => 'Last 1 hour',
+        '4h' => 'Last 4 hours',
+        '12h' => 'Last 12 hours',
+        '7d' => 'Last 7 days'
+    ),
+    array(
         'today' => 'Today',
         'week' => 'This Week',
         'month' => 'This Month',
@@ -35,14 +44,6 @@ $quick_filter = array(
         'weekday' => 'Week to day',
         'monthday' => 'Month to date',
         'yearday' => 'Year to date'
-    ),
-    array(
-        '15m' => 'Last 15 minutes',
-        '30m' => 'Last 30 minutes',
-        '1h' => 'Last 1 hour',
-        '4h' => 'Last 4 hours',
-        '12h' => 'Last 12 hours',
-        '7d' => 'Last 7 days'
     ),
     array(
         '30d' => 'Last 30 days',
@@ -107,9 +108,6 @@ $quick_filter = array(
 					<!-- new widget -->
 					<div class="jarviswidget" id="chart-filter-panel" data-widget-sortable="false" data-widget-togglebutton="false" data-widget-editbutton="false" data-widget-fullscreenbutton="false" data-widget-colorbutton="false" data-widget-deletebutton="false">
 						<header>
-							<span class="widget-icon"> <i class="glyphicon glyphicon-stats txt-color-darken"></i> </span>
-							<h2>Choose Chart condition</h2>
-
 							<ul class="nav nav-tabs pull-right in" id="myTab">
 								<li class="active">
 									<a data-toggle="tab" href="#s1"><i class="fa fa-clock-o"></i> <span class="hidden-mobile hidden-tablet">Quick</span></a>
@@ -137,12 +135,11 @@ $quick_filter = array(
 								<!-- content -->
 								<div id="myTabContent" class="tab-content">
 									<div class="tab-pane fade active in padding-10 no-padding-bottom" id="s1">
-                                        <div class="row col-md-12" id="time-range">
+                                        <div id="time-range">
                                             <?php
-                                                $divide_num = count($quick_filter);
                                                 foreach($quick_filter as $cate_item) {
                                             ?>
-                                            <div class="col-md-<?php echo $divide_num;?>">
+                                            <div>
                                                 <?php
                                                     foreach($cate_item as $v => $title) {
                                                 ?>
@@ -158,7 +155,7 @@ $quick_filter = array(
 
 									<div class="tab-pane fade" id="s2">
                                         <div class="row" style="margin: 30px;">
-                                            <div class="col-md-4" type="from">
+                                            <div class="col-md-6" type="from">
                                                 <div>
                                                     <b>From</b>
                                                 </div>
@@ -181,7 +178,7 @@ $quick_filter = array(
                                                     <label class="form-check-label" for="from-round-chkbox">Round to the <span>Hour</span></label>
                                                 </div>
                                             </div>
-                                            <div class="col-md-4" type="to">
+                                            <div class="col-md-6" type="to">
                                                 <div>
                                                     <b>To</b>
                                                 </div>
@@ -205,20 +202,32 @@ $quick_filter = array(
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="col-lg-offset-8">
-                                            <button class="btn btn-primary" onclick="time_range_render_chart();">Go</button>
+                                        <div class="pull-right" style="margin-bottom: 10px;">
+                                            <button class="btn btn-primary btn-lg" style="margin-right: 20px;" onclick="time_range_render_chart();">Go</button>
                                         </div>
 									</div>
 									<!-- end s2 tab pane -->
 
-									<div class="tab-pane fade" id="s3">
-                                        3
-									</div>
-
+									<div class="tab-pane fade" id="s3" style="padding: 20px;">
+                                        <div class="row" style="margin-bottom: 10px;">
+                                            <div class="col-md-6" align="center"><h4>From</h4></div>
+                                            <div class="col-md-6" align="center"><h4>To</h4></div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6" style="border-right: 1px solid #eee">
+                                                <div id="datetimepicker_from"></div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div id="datetimepicker_to"></div>
+                                            </div>
+                                        </div>                                        
+                                        <div class="pull-right" style="margin-top: 20px; margin-right: 10px; margin-bottom: 20px;">
+                                            <button class="btn btn-success btn-lg" onclick="absolute_time_range();">Go</button>
+                                        </div>
+                                    </div>
                                     <div class="tab-pane fade" id="s4" style="padding: 20px;"></div>
 									<!-- end s3 tab pane -->
 								</div>
-
 								<!-- end content -->
 							</div>
 
@@ -229,11 +238,14 @@ $quick_filter = array(
 
 				</article>
 			</div>
-
-            <div class="row" id="chart-widgets-container">
-                <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6 flow_panel top5_panel"></article>
-                <article class="col-xs-6 col-sm-6 col-md-6 col-lg-6 in_panel out_panel"></article>
+            <!-- NEW WIDGET START -->
+            <div id="chart-widgets-container">
+                <article class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                </article>
+                <article class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
+                </article>
             </div>
+            <!-- WIDGET END -->
 		</section>
 		<!-- end widget grid -->
 
@@ -276,9 +288,11 @@ $quick_filter = array(
 <script src="<?php echo ASSETS_URL; ?>/js/amchart/charts.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/amchart/themes/animated.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/amchart/themes/kelly.js"></script>
+
+<script src="<?php echo ASSETS_URL; ?>/js/datetime-picker/js/moment.js"></script>
+<script src="<?php echo ASSETS_URL; ?>/js/datetime-picker/js/bootstrap-datetimepicker.min.js"></script>
+
 <script src="<?php echo ASSETS_URL; ?>/js/pool_chart.js"></script>
-
-
 
 <script>
 	$(document).ready(function() {
