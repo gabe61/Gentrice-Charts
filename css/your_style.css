@@ -3,7 +3,7 @@
     height: 150px;
 }
 #chart-filter-panel {
-    display: inline-block;
+    display: none;
     margin-right: 10px;
     margin-top: -10px;
     float: right;

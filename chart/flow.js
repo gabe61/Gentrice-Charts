@@ -3,16 +3,16 @@ var data_flow = [];
 chart_config.flow = {
 
     // Chart title
-    "titles": [{
-        "text": "Flow Count",
-        "fontSize": 18,
-        "marginBottom": 10
-    }],
+    // "titles": [{
+    //     "text": "Flow Count",
+    //     "fontSize": 18,
+    //     "marginBottom": 10
+    // }],
 
     "data": [],
 
     // Set settings and data
-    "paddingRight": 40,
+    "paddingRight": 20,
 
     // Create X axes
     "xAxes": [{
@@ -72,6 +72,7 @@ chart_config.flow = {
         "behavior": "selectX",
         "events": {
             "cursorpositionchanged": function (ev) {
+                if(chart_pool.flow.data.length == 0) return false;
                 var curDate = ev.target.chart.xAxes.getIndex(0).positionToDate(ev.target.xPosition);
                 var curValue = ev.target.chart.yAxes.getIndex(0).positionToValue(ev.target.yPosition);
                 var curRange = prevZoomPos.en - prevZoomPos.st;
@@ -79,12 +80,13 @@ chart_config.flow = {
                 var cPos = (prevZoomPos.st + ev.target.xPosition * curRange) * datalen;
                 cPos = Math.round(cPos);
 
-                ftime_lab.text = dateFormatter.format(curDate, global_datetime_format);
+                if(ftime_lab) ftime_lab.text = dateFormatter.format(curDate, global_datetime_format);
 
                 if(data_flow[cPos]) {
                     var title_txt = window.localStorage.getItem('range_current_text');
                     flow_tlab.text = (title_txt ? title_txt : "Today") + "(" + data_flow[cPos]["value1"] + ")";
                 }
+                                
                 curPos.x = ev.target.xPosition;
                 curPos.y = ev.target.yPosition;
 
@@ -122,6 +124,7 @@ chart_config.flow = {
                 var from = parseInt(axis.positionToValue(range.start));
                 var to = parseInt(axis.positionToValue(range.end));
 
+                data_not_exists_alert = 'flow';
                 zoomIn(from, to);
             }
         }
@@ -132,7 +135,15 @@ chart_config.flow = {
 };
 
 function render_flow(response, day) {
-    var res_flow = JSON.parse(response).aggregations.q.buckets['*'].time_buckets.buckets;
+    response = JSON.parse(response);
+    if(!response.aggregations) {
+        if(data_not_exists_alert == 'flow') {
+            data_not_exists_alert = '';
+            alert('data is not exists');
+        }
+        return false;
+    }
+    var res_flow = response.aggregations.q.buckets['*'].time_buckets.buckets;
 
     data_flow = [];
     if (day == "t") {

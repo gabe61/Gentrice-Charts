@@ -1,12 +1,5 @@
 var data_in = [];
 chart_config.in = {
-    // Chart title
-    "titles": [{
-        "text": "In",
-        "fontSize": 18,
-        "marginBottom": 10
-    }],
-
     // Set settings and data
     "paddingRight": 40,
 
@@ -70,6 +63,7 @@ chart_config.in = {
         "behavior": "selectX",
         "events": {
             "cursorpositionchanged": function (ev) {
+                if(chart_pool.in.data.length == 0) return false;
                 var curDate = ev.target.chart.xAxes.getIndex(0).positionToDate(ev.target.xPosition);
                 var curValue = ev.target.chart.yAxes.getIndex(0).positionToValue(ev.target.yPosition);
                 var curRange = prevZoomPos.en - prevZoomPos.st;
@@ -122,7 +116,8 @@ chart_config.in = {
                 var from = axis.positionToValue(range.start);
                 var to = axis.positionToValue(range.end);
 
-                zoomIn(from, to, 'in');
+                data_not_exists_alert = 'in';
+                zoomIn(from, to);
 
             }
         }
@@ -133,6 +128,13 @@ chart_config.in = {
 };
 function render_in(response, day) {
     response = JSON.parse(response);
+    if(!response.aggregations) {
+        if(data_not_exists_alert == 'in') {
+            data_not_exists_alert = '';
+            alert('data is not exists');
+        }
+        return false;
+    }
     data_in = [];
     var res_in = response.aggregations.q.buckets['*'].time_buckets.buckets;
     var interval = res_in.length >= 2 ? (res_in[1].key - res_in[0].key) / 1000 : default_interval;

@@ -49,6 +49,8 @@ API_url = {
 
 };
 
+data_not_exists_alert = '';
+
 
 function bytes_to_bps(value, interval) {
     interval = interval || default_interval;
@@ -168,14 +170,12 @@ function create_chart_widget(chart_id) {
         '                    </div>');
     create_chart(chart_id);
 }
-
 function create_chart(chart_id) {
     if(chart_pool[chart_id]) {
         chart_pool[chart_id].dispose();
         delete chart_pool[chart_id];
         $('#chart_'+chart_id).html('');
     }
-
     if(!chart_config[chart_id]) {
         $.getScript(base_url+'/chart/'+chart_id+'.js', function() {
             __create_chart(chart_id);
@@ -337,7 +337,7 @@ function set_category_time_range(time_range_cate) {
 
 
 function zoomIn(from, to) {
-    setTimeout(() => {
+    setTimeout(function() {
         if (!from) {
             return;
         }
@@ -358,13 +358,11 @@ function zoomIn(from, to) {
         } else {
             _default_interval = Math.floor(_default_interval / 60 / 60) + 'h';
         }
-
         if(chart_pool.flow) create_chart('flow');
         if(chart_pool.in) create_chart('in');
         if(chart_pool.out) create_chart('out');
         if(chart_pool.top5) create_chart('top5');
-    }, 0)
-
+    }, 0);
 }
 
 function set_recent_category() {
@@ -849,9 +847,16 @@ function callAPI(apiurl, from, to, interval, graph, day) {
             render_out(response, day);
         }
     } else {
+        var url = '';
+        if(env == 'prodtest') {
+            url = 'testapi.php';
+        }
+        else {
+            url = 'api.php';
+        }
         $.ajax({
             type: "GET",
-            url: "api.php",
+            url: url,
             data: {
                 apiurl: apiurl,
                 from: from,

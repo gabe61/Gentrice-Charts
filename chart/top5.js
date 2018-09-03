@@ -1,12 +1,6 @@
 var data_top5 = [];
 chart_config.top5 = {
-    // Chart title
-    "titles": [{
-        "text": "Top 5",
-        "fontSize": 18,
-        "marginBottom": 10
-    }],
-
+  
     // Set settings and data
     "paddingRight": 40,
 
@@ -56,8 +50,7 @@ chart_config.top5 = {
         "behavior": "selectX",
         "events": {
             "cursorpositionchanged": function (ev) {
-                // cursorPosition.x = ev.target.chart.xAxes.getIndex(0).positionToDate(ev.target.xPosition);
-                // cursorPosition.y = ev.target.chart.yAxes.getIndex(0).positionToValue(ev.target.yPosition);
+                if(chart_pool.top5.data.length == 0) return false;
                 var curDate = ev.target.chart.xAxes.getIndex(0).positionToDate(ev.target.xPosition);
                 var curValue = ev.target.chart.yAxes.getIndex(0).positionToValue(ev.target.yPosition);
                 var curRange = prevZoomPos.en - prevZoomPos.st;
@@ -110,6 +103,7 @@ chart_config.top5 = {
                 var from = axis.positionToValue(range.start);
                 var to = axis.positionToValue(range.end);
 
+                data_not_exists_alert = 'top5';
                 zoomIn(from, to, "top5");
 
             }
@@ -121,6 +115,14 @@ chart_config.top5 = {
 };
 function render_top5(response, day) {
     response = JSON.parse(response);
+    if(!response.aggregations) {
+        if(data_not_exists_alert == 'top5') {
+            data_not_exists_alert = '';
+            alert('data is not exists');
+        }
+        return false;
+    }
+
     data_top5 = [];
     var res_top5 = response.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets;
     var graph = res_top5[0].time_buckets.buckets;

@@ -1,13 +1,6 @@
 var data_out = [];
 chart_config.out = {
 
-    // Chart title
-    "titles": [{
-        "text": "Out",
-        "fontSize": 18,
-        "marginBottom": 10
-    }],
-
     // Set settings and data
     "paddingRight": 40,
 
@@ -71,8 +64,7 @@ chart_config.out = {
         },
         "events": {
             "cursorpositionchanged": function (ev) {
-                // cursorPosition.x = ev.target.chart.xAxes.getIndex(0).positionToDate(ev.target.xPosition);
-                // cursorPosition.y = ev.target.chart.yAxes.getIndex(0).positionToValue(ev.target.yPosition);
+                if(chart_pool.out.data.length == 0) return false;
                 var curDate = ev.target.chart.xAxes.getIndex(0).positionToDate(ev.target.xPosition);
                 var curValue = ev.target.chart.yAxes.getIndex(0).positionToValue(ev.target.yPosition);
                 var curRange = prevZoomPos.en - prevZoomPos.st;
@@ -124,6 +116,7 @@ chart_config.out = {
                 var axis = ev.target.chart.xAxes.getIndex(0);
                 var from = axis.positionToValue(range.start);
                 var to = axis.positionToValue(range.end);
+                data_not_exists_alert = 'out';
                 zoomIn(from, to);
             }
         }
@@ -135,6 +128,13 @@ chart_config.out = {
 
 function render_out(response, day) {
     response = JSON.parse(response);
+    if(!response.aggregations) {
+        if(data_not_exists_alert == 'out') {
+            data_not_exists_alert = '';
+            alert('data is not exists');
+        }
+        return false;
+    }
     var res_out = response.aggregations.q.buckets['*'].time_buckets.buckets;
     data_out = [];
     var interval = res_out.length >= 2 ? (res_out[1].key - res_out[0].key) / 1000 : default_interval;
