@@ -292,6 +292,7 @@ $quick_filter = array(
 <script src="<?php echo ASSETS_URL; ?>/js/datetime-picker/js/moment.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/datetime-picker/js/bootstrap-datetimepicker.min.js"></script>
 
+<script src="<?php echo ASSETS_URL; ?>/js/time_range_cate.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/pool_chart.js"></script>
 
 <script>

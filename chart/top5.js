@@ -115,7 +115,7 @@ chart_config.top5 = {
 };
 function render_top5(response, day) {
     response = JSON.parse(response);
-    if(!response.aggregations) {
+    if(!response.aggregations || response.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets.length === 0) {
         if(data_not_exists_alert == 'top5') {
             data_not_exists_alert = '';
             alert('data is not exists');
@@ -124,7 +124,7 @@ function render_top5(response, day) {
     }
 
     data_top5 = [];
-    var res_top5 = response.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets;
+    var res_top5 = response.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets;    
     var graph = res_top5[0].time_buckets.buckets;
     var all_values = [];
     // 

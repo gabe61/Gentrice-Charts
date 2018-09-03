@@ -1,131 +1,7 @@
+var defaultZoomPoints = 100;
 var current_range = window.localStorage.getItem('range_current');
 var default_from = '';
 var default_to = '';
-
-function set_category_time_range(time_range_cate) {
-    var tday = new Date();
-
-    switch(time_range_cate) {
-        case 'today':
-            default_to = tday.getTime();
-            tday.setHours(0, 0, 0, 0);
-            default_from = tday.getTime();
-            break;
-
-        case 'week':
-            default_to = tday.getTime();
-            var day = tday.getDay(),
-                diff = tday.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
-            default_from = (new Date(tday.setDate(diff))).getTime();
-            break;
-
-        case 'month':
-            default_to = tday.getTime();
-            tday.setDate(1);
-            default_from = tday.getTime();
-            break;
-
-        case 'year':
-            default_to = tday.getTime();
-            tday.setMonth(0);
-            tday.setDate(1);
-            default_from = tday.getTime();
-            break;
-
-        case 'weekday':
-            default_to = tday.getTime();
-            var day = tday.getDay(),
-                diff = tday.getDate() - day + (day == 0 ? -6:1); // adjust when day is sunday
-            default_from = (new Date(tday.setDate(diff))).getTime();
-            break;
-
-        case 'monthday':
-            default_to = tday.getTime();
-            tday.setDate(1);
-            default_from = tday.getTime();
-            break;
-
-        case 'yearday':
-            default_to = tday.getTime();
-            tday.setMonth(0);
-            tday.setDate(1);
-            default_from = tday.getTime();
-            break;
-
-        case '24h':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (24 * 60 * 60 * 1000));
-            default_from = default_from.getTime();
-            break;
-
-        case '12h':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (12 * 60 * 60 * 1000));
-            default_from = default_from.getTime();
-            break;
-
-        case '4h':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (4 * 60 * 60 * 1000));
-            default_from = default_from.getTime();
-            break;
-
-        case '1h':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (60 * 60 * 1000));
-            default_from = default_from.getTime();
-            break;
-
-        case '15m':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (15 * 60 * 1000));
-            default_from = default_from.getTime();
-            break;
-
-        case '7d':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (7 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-
-        case '30d':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (30 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-        case '60d':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (60 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-        case '90d':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (90 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-        case '6mm':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (30 * 6 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-
-        case '1y':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (365 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-        case '2y':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (2 * 365 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-        case '5y':
-            default_to = tday.getTime();
-            default_from = new Date(default_to - (5 * 365 * 24 * 3600 * 1000));
-            default_from = default_from.getTime();
-            break;
-    }
-}
 
 if(current_range.indexOf('{"') === -1) {
     set_category_time_range(current_range);
@@ -136,20 +12,19 @@ else {
     default_from = current_range.from;
 }
 
+
 function get_url(type) {
     
 
     if(default_from > 0 && default_to > 0) {
 
         var host = 'http://192.168.10.133:60080/api/visualize/Top-NetFlow-';
-        if(type === 'src-ip') host += 'Src-IP?';
-        else if(type === 'desc-ip') host += 'Desc-IP?';
-        else if(type === 'src-port') host += 'Src-Port?';
-        else if(type === 'desc-port') host += 'Desc-Port?';
-        else if(type === 'protocol') host += 'Protocol?';
-
-        return host += 'from='+default_from+'&to='+default_to;
-        
+        if(type === 'src-ip') host += 'Src-IP';
+        else if(type === 'desc-ip') host += 'Desc-IP';
+        else if(type === 'src-port') host += 'Src-Port';
+        else if(type === 'desc-port') host += 'Desc-Port';
+        else if(type === 'protocol') host += 'Protocol';        
+        return host;
     }
     
     return false;
@@ -210,14 +85,38 @@ function set_grid_data(type) {
         setGrid_data(type, sample_json);
     }
     else {
-        var url = get_url(type);
+        var url = '';
+        if(env == 'prodtest') {
+            url = 'testapi.php';
+        }
+        else {
+            url = 'api.php';
+        }
         if(!url) {
             alert('Set Time range');
         }
         else {
+            var to = default_to;
+            var from = default_from;
+            var _default_interval = Math.floor((to - from) / defaultZoomPoints / 1000);
+            _default_interval = _default_interval == 0 ? 1 : _default_interval;
+            if (_default_interval < 60) {
+                _default_interval = _default_interval + 's';
+            } else if (_default_interval < 60 * 60) {
+                _default_interval = Math.floor(_default_interval / 60) + 'm';
+            } else {
+                _default_interval = Math.floor(_default_interval / 60 / 60) + 'h';
+            }
+
             $.ajax({
                 url: url,
                 dataType: 'json',
+                data: {
+                    apiurl: get_url(type),
+                    from: from,
+                    to: to,
+                    interval: _default_interval
+                },
                 success: function(rdata) {
                     setGrid_data(type, rdata);
                 }

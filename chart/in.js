@@ -128,7 +128,7 @@ chart_config.in = {
 };
 function render_in(response, day) {
     response = JSON.parse(response);
-    if(!response.aggregations) {
+    if(!response.aggregations || response.aggregations.q.buckets['*'].time_buckets.buckets.length == 0) {
         if(data_not_exists_alert == 'in') {
             data_not_exists_alert = '';
             alert('data is not exists');

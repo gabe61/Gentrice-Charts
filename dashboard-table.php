@@ -128,6 +128,7 @@ include("inc/nav.php");
 
 <script src="<?php echo ASSETS_URL; ?>/js/plugin/jqgrid/jquery.jqGrid.min.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/plugin/jqgrid/grid.locale-en.min.js"></script>
+<script src="<?php echo ASSETS_URL; ?>/js/time_range_cate.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/dashboard-table.js"></script>
 
 
