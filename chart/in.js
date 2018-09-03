@@ -117,7 +117,7 @@ chart_config.in = {
                 var to = axis.positionToValue(range.end);
 
                 data_not_exists_alert = 'in';
-                zoomIn(from, to);
+                zoomIn(parseInt(from), parseInt(to));
 
             }
         }

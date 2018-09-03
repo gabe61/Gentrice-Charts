@@ -125,7 +125,7 @@ chart_config.flow = {
                 var to = parseInt(axis.positionToValue(range.end));
 
                 data_not_exists_alert = 'flow';
-                zoomIn(from, to);
+                zoomIn(parseInt(from), parseInt(to));
             }
         }
     },

@@ -104,7 +104,7 @@ chart_config.top5 = {
                 var to = axis.positionToValue(range.end);
 
                 data_not_exists_alert = 'top5';
-                zoomIn(from, to, "top5");
+                zoomIn(parseInt(from), parseInt(to));
 
             }
         }
