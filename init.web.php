@@ -33,10 +33,6 @@ $page_nav = array(
             "analytics" => array(
                 "title" => "Analytics Dashboard",
                 "url" => APP_URL
-            ),
-            "table_dashboard" => array(
-                "title" => "Table Dashboard",
-                "url" => APP_URL."/dashboard-table.php"
             )
         )
     )

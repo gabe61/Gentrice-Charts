@@ -17,6 +17,7 @@ $page_title = "Dashboard";
 //Note: all css files are inside css/ folder
 $page_css[] = "your_style.css";
 $page_css[] = "../js/datetime-picker/css/bootstrap-datetimepicker.min.css";
+$page_css[] = "select2.css";
 include("inc/header.php");
 
 //include left panel (navigation)
@@ -25,8 +26,32 @@ $page_nav["dashboard"]["sub"]["analytics"]["active"] = true;
 include("inc/nav.php");
 
 $chart_pool = array(
-   'flow', 'top5', 'in', 'out'
+   'chart' => [
+       'flow' => 'Flow-Count',
+       'top5' => 'Protocol-Top5',
+       'in' => 'NetFlow-In',
+       'out' => 'NetFlow-Out'
+   ],
+   'table' => [
+       'src' => 'Top Sources',
+       'desc' => 'Top Description',
+       'srcport' => 'Top Sources Ports',
+       'descport' => 'Top Description Ports'
+   ]
 );
+
+$apiUrl = array(
+    'flow' => 'http://192.168.10.133:60080/api/visualize/Overview-Flow-Count',
+    'top5' => 'http://192.168.10.133:60080/api/visualize/Overview-Protocol-Top5',
+    'in' => 'http://192.168.10.133:60080/api/visualize/Overview-NetFlow-In',
+    'out' => 'http://192.168.10.133:60080/api/visualize/Overview-NetFlow-Out',
+
+    'src' => 'http://192.168.10.133:60080/api/visualize/Top-NetFlow-Src-IP',
+    'desc' => 'http://192.168.10.133:60080/api/visualize/Top-NetFlow-Desc-IP',
+    'srcport' => 'http://192.168.10.133:60080/api/visualize/Top-NetFlow-Src-Port',
+    'descport' => 'http://192.168.10.133:60080/api/visualize/Top-NetFlow-Desc-Port'
+);
+
 $quick_filter = array(
     array(
         '15m' => 'Last 15 minutes',
@@ -55,6 +80,21 @@ $quick_filter = array(
         '5y' => 'Last 5 years'
     )
 );
+
+
+function render_pool($type = 'chart') {
+    global $chart_pool;
+    foreach($chart_pool[$type] as $key => $chart) {
+        ?>
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" value="<?php echo $key;?>" data-type="<?php echo $type;?>" id="checkbox-<?php echo $key;?>">
+            <label class="form-check-label" for="checkbox-<?php echo $key;?>">
+                <?php echo $chart;?>
+            </label>
+        </div>
+        <?php
+    }
+}
 ?>
 <!-- ==========================CONTENT STARTS HERE ========================== -->
 <!-- MAIN PANEL -->
@@ -75,19 +115,18 @@ $quick_filter = array(
 			<div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
                 <div class="ml-auto pull-right">
                     <button type="button" class="btn btn-info btn-lg" id="btn-chart-filter">Today</button>
-                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#chart-type-container">Select chart Pool</button>
+                    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#chart-type-container">Select Graph</button>
                     <div id="chart-type-container" class="modal fade" role="dialog" aria-hidden="true">
                         <div class="modal-dialog">
                             <!-- Modal content-->
                             <div class="modal-content">
                                 <div class="modal-body" id="chartTypeContainer">
-                                    <?php
-                                    for($i = 0; $i < count($chart_pool); $i ++) {
-                                    ?>
                                     <div class="div-container">
-                                        <img value="<?php echo $chart_pool[$i]?>" src="img/chart/<?php echo $chart_pool[$i]?>.png" />
+                                        <h2 class="chart-pool">Chart</h2>
+                                        <?php render_pool('chart');?>
+                                        <h2 class="chart-pool">Table</h2>
+                                        <?php render_pool('table');?>
                                     </div>
-                                    <?php }?>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
@@ -103,10 +142,10 @@ $quick_filter = array(
 		<section id="widget-grid-1" class="">
 
 			<!-- row -->
-			<div class="row">
-				<article class="col-sm-12">
+			<div class="row" style="margin: 0; padding: 0; float: right;">
+				<article class="col-sm-12" id="chart-filter-panel">
 					<!-- new widget -->
-					<div class="jarviswidget" id="chart-filter-panel" data-widget-sortable="false" data-widget-togglebutton="false" data-widget-editbutton="false" data-widget-fullscreenbutton="false" data-widget-colorbutton="false" data-widget-deletebutton="false">
+					<div class="jarviswidget" data-widget-sortable="false" data-widget-togglebutton="false" data-widget-editbutton="false" data-widget-fullscreenbutton="false" data-widget-colorbutton="false" data-widget-deletebutton="false" style="z-index: 99999999999">
 						<header>
 							<ul class="nav nav-tabs pull-right in" id="myTab">
 								<li class="active">
@@ -238,6 +277,10 @@ $quick_filter = array(
 
 				</article>
 			</div>
+            <div class="well">
+                <span id="add-filter-panel"></span>
+                <button class="btn btn-default" onclick="open_new_filter();">Add Filter <i class="fa fa-plus"></i></button>
+            </div>
             <!-- NEW WIDGET START -->
             <div id="chart-widgets-container">
                 <article class="col-xs-12 col-sm-6 col-md-6 col-lg-6">
@@ -251,7 +294,52 @@ $quick_filter = array(
 
 	</div>
 	<!-- END MAIN CONTENT -->
+    <div class="modal fade" id="dialog-add-filter">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 800px; margin-left: calc(50% - 400px)">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="add-filter-title">Add Filter</h5>
+                </div>
+                <div class="modal-body">
+                        <div class="form-group">
+                            <label for="filter-category">Filter</label>
+                            <div class="row">
+                                <div class="col-md-5">
+                                    <select id="filter-category" class="form-control" data-placeholder="Fields...">
+                                        <option value=""></option>
+                                        <option value="ip">IPV4</option>
+                                        <option value="port">PORT</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select id="filter-operator" data-placeholder="Operators...">
+                                        <option value=""></option>
+                                        <option value="IS">IS</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input id="filter-value" class="form-control" placeholder="IP address" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="filter-label">Label</label>
+                            <input type="text" class="form-control" placeholder="Optional" style="width: 50%" id="filter-label">
+                        </div>
 
+                </div>
+                <div class="modal-footer">
+                    <div class="pull-left" id="shortcut-filter-trash" style="display: none;">
+                        <button type="button" class="btn btn-danger" onclick="shortcut_filter_trash();"><i class="fa fa-trash"></i></button>
+                    </div>
+                    <div class="pull-right">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="filter_save()">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- END MAIN PANEL -->
 
@@ -278,12 +366,8 @@ $quick_filter = array(
 <script src="<?php echo ASSETS_URL; ?>/js/plugin/vectormap/jquery-jvectormap-1.2.2.min.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/plugin/vectormap/jquery-jvectormap-world-mill-en.js"></script>
 
-<!-- Full Calendar -->
+    <!-- Full Calendar -->
 
-
-<script src="<?php echo ASSETS_URL; ?>/js/imgCheckbox-master/jquery.imgcheckbox.js"></script>
-
-<script src="<?php echo ASSETS_URL; ?>/js/randomColor.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/amchart/core.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/amchart/charts.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/amchart/themes/animated.js"></script>
@@ -292,14 +376,22 @@ $quick_filter = array(
 <script src="<?php echo ASSETS_URL; ?>/js/datetime-picker/js/moment.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/datetime-picker/js/bootstrap-datetimepicker.min.js"></script>
 
+<script src="<?php echo ASSETS_URL; ?>/js/plugin/datatables/jquery.dataTables.min.js"></script>
+    <script src="<?php echo ASSETS_URL; ?>/js/plugin/datatables/dataTables.bootstrap.min.js"></script>
+    <script src="<?php echo ASSETS_URL; ?>/js/plugin/datatables/dataTables.tableTools.min.js"></script>
+    <script src="<?php echo ASSETS_URL; ?>/js/plugin/datatables/dataTables.colReorder.min.js"></script>
+    <script src="<?php echo ASSETS_URL; ?>/js/plugin/datatables/dataTables.colVis.min.js"></script>
+
+    <script src="<?php echo ASSETS_URL; ?>/js/plugin/select2/select2.min.js"></script>
+
+
 <script src="<?php echo ASSETS_URL; ?>/js/time_range_cate.js"></script>
+    <script src="<?php echo ASSETS_URL; ?>/js/main.js"></script>
 <script src="<?php echo ASSETS_URL; ?>/js/pool_chart.js"></script>
+    <script src="<?php echo ASSETS_URL; ?>/js/dashboard-table.js"></script>
 
 <script>
-	$(document).ready(function() {
-
-	});
-
+    var api = <?php echo json_encode($apiUrl);?>;
 </script>
 
 <?php

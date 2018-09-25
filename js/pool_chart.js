@@ -6,15 +6,10 @@ var in_tlab, in_ylab;
 var out_tlab, out_ylab;
 var top5_tlab, top5_tlab1, top5_tlab2, top5_tlab3, top5_tlab4;
 
-var default_interval = 5;
-var _default_interval;
-var default_from;
-var default_to;
-
 var dateFormatter = new am4core.DateFormatter();
 var global_datetime_format = "d MMM, yyyy H:m:s";
 var axisBreakThreshold = 0.6;
-var defaultZoomPoints = 100;
+
 var prevZoomPos = {
     st: 0,
     en: 1
@@ -41,16 +36,14 @@ var curOut = {
     y: null
 };
 
-API_url = {
-    flow: 'http://192.168.10.133:60080/api/visualize/Overview-Flow-Count',
-    top5: 'http://192.168.10.133:60080/api/visualize/Overview-Protocol-Top5',
-    in: 'http://192.168.10.133:60080/api/visualize/Overview-NetFlow-In',
-    out: 'http://192.168.10.133:60080/api/visualize/Overview-NetFlow-Out'
-
-};
+function allChartRefresh() {
+    if(chart_pool.flow) chart_create('flow');
+    if(chart_pool.in) chart_create('in');
+    if(chart_pool.out) chart_create('out');
+    if(chart_pool.top5) chart_create('top5');
+}
 
 data_not_exists_alert = '';
-
 
 function bytes_to_bps(value, interval) {
     interval = interval || default_interval;
@@ -72,149 +65,52 @@ function dispose(chart_id) {
 }
 
 
-function refresh_widgets() {
-    $('#widget-grid-1').jarvisWidgets({
-        grid: 'article',
-        widgets: '.jarviswidget',
-        localStorage: localStorageJarvisWidgets,
-        deleteSettingsKey: '#deletesettingskey-options',
-        settingsKeyLabel: 'Reset settings?',
-        deletePositionKey: '#deletepositionkey-options',
-        positionKeyLabel: 'Reset position?',
-        sortable: sortableJarvisWidgets,
-        buttonsHidden: false,
-        // toggle button
-        toggleButton: true,
-        toggleClass: 'fa fa-minus | fa fa-plus',
-        toggleSpeed: 200,
-        onToggle: function () {},
-        // delete btn
-        deleteButton: true,
-        deleteMsg: 'Warning: This action cannot be undone!',
-        deleteClass: 'fa fa-times',
-        deleteSpeed: 200,
-        onDelete: function () {},
-        // edit btn
-        editButton: true,
-        editPlaceholder: '.jarviswidget-editbox',
-        editClass: 'fa fa-cog | fa fa-save',
-        editSpeed: 200,
-        onEdit: function () {},
-        // color button
-        colorButton: true,
-        // full screen
-        fullscreenButton: true,
-        fullscreenClass: 'fa fa-expand | fa fa-compress',
-        fullscreenDiff: 3,
-        onFullscreen: function (container) {
-            if($('#jarviswidget-fullscreen-mode').is('div') === true) {
-                container.find('.widget-body').height('100%');
-            }
-            else {
-                container.find('.widget-body').height(300);
-            }
-        },
-        // custom btn
-        customButton: false,
-        customClass: 'folder-10 | next-10',
-        customStart: function () {
-            alert('Hello you, this is a custom button...');
-        },
-        customEnd: function () {
-            alert('bye, till next time...');
-        },
-        // order
-        buttonOrder: '%refresh% %custom% %edit% %toggle% %fullscreen% %delete%',
-        opacity: 1.0,
-        dragHandle: '> header',
-        placeholderClass: 'jarviswidget-placeholder',
-        indicator: true,
-        indicatorTime: 600,
-        ajax: true,
-        timestampPlaceholder: '.jarviswidget-timestamp',
-        timestampFormat: 'Last update: %m%/%d%/%y% %h%:%i%:%s%',
-        refreshButton: true,
-        refreshButtonClass: 'fa fa-refresh',
-        labelError: 'Sorry but there was a error:',
-        labelUpdated: 'Last Update:',
-        labelRefresh: 'Refresh',
-        labelDelete: 'Delete widget:',
-        afterLoad: function () {},
-        rtl: false, // best not to toggle this!
-        onChange: function () {
-        },
-        onSave: function () {
-
-        },
-        ajaxnav: $.navAsAjax
-    });
-}
-function create_chart_widget(chart_id) {
-    var chart_container = $('#chart-widgets-container');
-    var widget_container = '';
-
-    var article1 = chart_container.children('article:first');
-    var article2 = chart_container.children('article:last');
-    if(article1.children().length <= article2.children().length) {
-        widget_container = article1;
-    }
-    else {
-        widget_container = article2;
-    }
-
-    widget_container.append('<div class="jarviswidget" data-widget-editbutton="false" data-widget-deletebutton="false" id="chart-widget-'+chart_id+'">\n' +
-        '                        <header><h2><strong>'+chart_id.toUpperCase()+'</strong> <i>chart</i></h2></header>' +
-        '                        <div style="height: 100%;">' +
-        '                            <div class="widget-body" style="height: 300px;"><div id="chart_'+chart_id+'" style="height: 100%"></div></div>' +
-        '                        </div>'+
-        '                    </div>');
-    create_chart(chart_id);
-}
-function create_chart(chart_id) {
+function chart_create(chart_id) {
     if(chart_pool[chart_id]) {
         chart_pool[chart_id].dispose();
         delete chart_pool[chart_id];
-        $('#chart_'+chart_id).html('');
+        $('#graph_'+chart_id).html('');
     }
     if(!chart_config[chart_id]) {
         $.getScript(base_url+'/chart/'+chart_id+'.js', function() {
-            __create_chart(chart_id);
+            __chart_create(chart_id);
         });
     }
     else {
-        __create_chart(chart_id);
+        __chart_create(chart_id);
     }
 }
-function __create_chart(chart_id) {
-    chart_pool[chart_id] = am4core.createFromConfig(chart_config[chart_id], 'chart_'+chart_id, 'XYChart');
-    callAPI(API_url[chart_id], default_from, default_to, _default_interval, chart_id, "t");
+function __chart_create(chart_id) {
+    chart_pool[chart_id] = am4core.createFromConfig(chart_config[chart_id], 'graph_'+chart_id, 'XYChart');
+    callAPI(api[chart_id], default_from, default_to, defaultInterval, chart_id, "t");
 }
+
 function zoomIn(from, to) {
     setTimeout(function() {
         if (!from) {
             return;
         }
-        _default_interval = Math.floor((to - from) / defaultZoomPoints / 1000);
-        _default_interval = _default_interval == 0 ? 1 : _default_interval;
+        defaultInterval = Math.floor((to - from) / defaultZoomPoints / 1000);
+        defaultInterval = defaultInterval == 0 ? 1 : defaultInterval;
         default_from = from;
         default_to = to;
 
-        if (to - from < _default_interval * 20 * 1000) {
+        if (to - from < defaultInterval * 20 * 1000) {
             alert('Range very small. reselect the range');
             return;
         }
 
-        if (_default_interval < 60) {
-            _default_interval = _default_interval + 's';
-        } else if (_default_interval < 60 * 60) {
-            _default_interval = Math.floor(_default_interval / 60) + 'm';
+        if (defaultInterval < 60) {
+            defaultInterval = defaultInterval + 's';
+        } else if (defaultInterval < 60 * 60) {
+            defaultInterval = Math.floor(defaultInterval / 60) + 'm';
         } else {
-            _default_interval = Math.floor(_default_interval / 60 / 60) + 'h';
+            defaultInterval = Math.floor(defaultInterval / 60 / 60) + 'h';
         }
-        if(chart_pool.flow) create_chart('flow');
-        if(chart_pool.in) create_chart('in');
-        if(chart_pool.out) create_chart('out');
-        if(chart_pool.top5) create_chart('top5');
+        //chart
+        allChartRefresh();
+        //table
+        allTableDataRefresh();
     }, 0);
 }
 
@@ -225,315 +121,51 @@ function set_recent_category() {
         var s4 = $('#s4').html('');
         $.each(recents, function() {
             s4.append('<div class="btn-group" role="group" aria-label="First group" style="margin: 10px">\n' +
-                '                                            <button type="button" class="btn btn-secondary" onclick="set_new_timerange(\''+this.time_range+'\', \''+this.text+'\', \''+this.from+'\', \''+this.to+'\');">'+this.text+'</button>\n' +
-                '                                            <button type="button" class="btn btn-secondary" onclick="remove_recent_cate(this, \''+this.time_range+'\')"><i class="fa fa-close" aria-hidden="true"></i></button>\n' +
-                '                                        </div>');
+                '<button type="button" class="btn btn-secondary" onclick="set_new_timerange(\''+this.time_range+'\', \''+this.text+'\', \''+this.from+'\', \''+this.to+'\');">'+this.text+'</button>\n' +
+                '<button type="button" class="btn btn-secondary" onclick="remove_recent_cate(this, \''+this.time_range+'\')"><i class="fa fa-close" aria-hidden="true"></i></button>\n' +
+            '</div>');
         });
     }
 }
-function set_new_timerange(time_range, text, from, to) {
-    $('#btn-chart-filter').text(text);
-    window.localStorage.setItem('range_current_text', text);
+function create_axis_break(axis, arr, key) {
+    axis.axisBreaks.clear();
 
-    if(from && to && from !== 'undefined' && to !== 'undefined') {
-        zoomIn(parseInt(from), parseInt(to));
-        time_range = JSON.stringify({
-            from: from,
-            to: to,
-            time_range: time_range
-        });
-    }
-    else {
-        set_category_time_range(time_range);
-        if(chart_pool.flow) create_chart('flow');
-        if(chart_pool.in) create_chart('in');
-        if(chart_pool.out) create_chart('out');
-        if(chart_pool.top5) create_chart('top5');
-    }
-    window.localStorage.setItem('range_current', time_range);
-
-    $('#chart-filter-panel').hide(0);
-}
-function remove_recent_cate(btn, time_range) {
-    $(btn).closest('.btn-group').remove();
-    var range_recents = JSON.parse(window.localStorage.getItem('range_recent'));
-    $.each(range_recents, function(range_index) {
-        if(this.time_range === time_range) {
-            range_recents.splice(range_index, 1);
-            return false;
-        }
+    arr = arr.filter(function (a) {
+        return a[key];
     });
-    window.localStorage.setItem('range_recent', JSON.stringify(range_recents));
-}
-
-$(function() {
-    let img_list = $('#chart-type-container').find('img');
-    var current_range = window.localStorage.getItem('range_current');
-    if(current_range) {
-        if(current_range.indexOf('{"') === -1) {
-            set_category_time_range(current_range);
-        }
-        else {
-            current_range = JSON.parse(current_range);
-            default_to = parseInt(current_range.to);
-            default_from = parseInt(current_range.from);
-
-            _default_interval = Math.floor((default_to - default_from) / defaultZoomPoints / 1000);
-            _default_interval = _default_interval == 0 ? 1 : _default_interval;
-
-            if (_default_interval < 60) {
-                _default_interval = _default_interval + 's';
-            } else if (_default_interval < 60 * 60) {
-                _default_interval = Math.floor(_default_interval / 60) + 'm';
-            } else {
-                _default_interval = Math.floor(_default_interval / 60 / 60) + 'h';
-            }
-        }
-        $('#btn-chart-filter').text(window.localStorage.getItem('range_current_text'));
-    }
-    else set_category_time_range('today');
-    // return;
-
-    //generate recents
-    set_recent_category();
-
-    img_list.imgCheckbox({
-        onclick: (el) => {
-            $('#widget-grid-1').jarvisWidgets('destroy');
-            var isChecked = el.hasClass("imgChked");
-            var chart_id = el.children('img').attr('value');
-            var chart_store_data = window.localStorage.getItem('chart_store_data');
-            if(!chart_store_data) {
-                chart_store_data = [];
-            }
-            else {
-                chart_store_data = chart_store_data.split(',');
-            }
-            if(isChecked === true) {
-                create_chart_widget(chart_id);
-                chart_store_data.push(chart_id);
-            }
-            else {
-                $('#chart-widget-'+chart_id).remove();
-                if(chart_pool[chart_id]) {
-                    chart_pool[chart_id].dispose();
-                    delete chart_pool[chart_id];
-                    delete chart_config[chart_id];
-                }
-                chart_store_data.splice(chart_store_data.indexOf(chart_id), 1);
-            }
-            if(chart_store_data.length == 0) {
-                window.localStorage.removeItem('chart_store_data');
-            }
-            else {
-                window.localStorage.setItem('chart_store_data', chart_store_data);
-            }
-            refresh_widgets();
-        }
-    });
-    var chart_store_data = window.localStorage.getItem('chart_store_data');
-    if(chart_store_data) {
-        chart_store_data = chart_store_data.split(',');
-        chart_store_data.forEach(function(chart_id) {
-            img_list.parent().children('[value="'+chart_id+'"]').select();
-            create_chart_widget(chart_id);
-        });
-        refresh_widgets();
-    }
-    $('#btn-chart-filter').click(function() {
-        var container = $('#chart-filter-panel');
-        if(container.css('display') === 'block') {
-            container.stop(true, true).fadeOut();
-        }
-        else {
-            container.stop(true, true).fadeIn();
-        }
+    arr = arr.sort(function (a, b) {
+        return (a[key] > b[key]) ? 1 : ((b[key] > a[key]) ? -1 : 0);
     });
 
-    $('#chart-filter-panel').hide(0);
-    $('#time-range').find('a').click(function() {
-        var range_cate = this.getAttribute('value');
-        var range_recents = window.localStorage.getItem('range_recent');
-
-        window.localStorage.setItem('range_current', range_cate);
-        $('#btn-chart-filter').text(this.textContent);
-        window.localStorage.setItem('range_current_text', this.textContent);
-
-        if(!range_recents) range_recents = [];
-        else range_recents = JSON.parse(range_recents);
-        var flag_addrecent = true;
-        var each_range;
-        for(each_range of range_recents) {
-            if(each_range.time_range === range_cate) {
-                flag_addrecent = false;
-                break;
-            }
-        }
-        if(flag_addrecent === true) {
-            range_recents.push({
-                time_range: range_cate,
-                text: this.textContent
-            });
-
-            //register_time_range
-            window.localStorage.setItem('range_recent', JSON.stringify(range_recents));
-            set_recent_category();
-        }
-        //store range category
-        set_new_timerange(range_cate, this.textContent);
-        $('#chart-filter-panel').hide(0);
-    });
-
-    $('div[type]').find('input,select').change(function() {
-        var area = $(this).closest('div[type]');
-        var input = area.find('input[type="number"]');
-        var select = area.find('select');
-        var chkbox = area.find('input[type="checkbox"]');
-
-        var number = input.val();
-        var val;
-        if(/^-?\d+\.?\d*$/.test(number) === false) {
-            input.val(1);
-            val = 1;
-        }
-        else {
-            val = parseInt(number);
-        }
-        if(val < 1) {
-            input.val(1);
-            val = 1;
-        }
-        var tday = new Date();
-        var tto = tday.getTime();
-        var range_cate = select.val();
-        var calc_date;
-        if(range_cate === 'h') {
-            calc_date = new Date(tto - (val * 3600 * 1000));
-            if(chkbox.prop('checked') === true) {
-                calc_date.setMinutes(0);
-                calc_date.setSeconds(0);
-            }
-            area.find('span').text('Hour');
-        }
-        else if(range_cate === 'm') {
-            calc_date = new Date(tto - (val * 60 * 1000));
-            if(chkbox.prop('checked') === true) {
-                calc_date.setSeconds(0);
-            }
-            area.find('span').text('Minute');
-        }
-        if(range_cate === 's') {
-            calc_date = new Date(tto - (val * 1000));
-            if(chkbox.prop('checked') === true) {
-                calc_date.setMilliseconds(0);
-            }
-            area.find('span').text('Second');
-        }
-
-        area.data('date', calc_date);
-        area.find('.calculated-time').text(calc_date.toString().substring(0, calc_date.toString().indexOf('GMT')));
-    });
-
-    $('#datetimepicker_from, #datetimepicker_to').datetimepicker({
-        inline: true,
-        sideBySide: true
-    });
-});
-
-function go_from_to(from, to, text) {
-    var range_recents = window.localStorage.getItem('range_recent');
-    $('#btn-chart-filter').text(text);
-
-    window.localStorage.setItem('range_current', JSON.stringify({from: from, to: to}));
-    
-    window.localStorage.setItem('range_current_text', text);
-
-    if(!range_recents) range_recents = [];
-    else range_recents = JSON.parse(range_recents);
-    var flag_addrecent = true;
-    var each_range;
-
-    var new_each_range = (from + to).toString(16);
-    for(each_range of range_recents) {
-        if(each_range.time_range === new_each_range) {
-            flag_addrecent = false;
-            break;
-        }
-    }
-    if(flag_addrecent === true) {
-        range_recents.push({
-            time_range: new_each_range,
-            text: text,
-            to: to,
-            from: from
-        });
-
-        //register_time_range
-        window.localStorage.setItem('range_recent', JSON.stringify(range_recents));
-        set_recent_category();
-
-        zoomIn(from, to);
-    }
-    $('#chart-filter-panel').hide(0);
-}
-
-function time_range_render_chart() {
-    var dom_from = $('div[type="from"]');
-    var dom_to = $('div[type="to"]');
-
-    var from = dom_from.data('date');
-    var to = dom_to.data('date');
-    if(!from || !to) {
-        alert('Input time range value.');
+    if(arr.length == 0) {
         return false;
     }
-    from = from.getTime();
-    to = to.getTime();
+    var total = arr[arr.length - 1][key] - arr[0][key];
 
-    if(!from || !to) {
-        alert('Invalid time range.');
-    }
-    else {
-        var diff = Math.floor((to - from) / defaultZoomPoints / 1000);
-        diff = diff == 0 ? 1 : diff;
+    for (var i = 0; i < arr.length - 1; i++) {
+        var diff = arr[i + 1][key] - arr[i][key];
+        if ((diff / total) >= axisBreakThreshold) {
+            axis.min = 0;
+            axis.max = arr[arr.length - 1][key] * 1.02;
+            axis.strictMinMax = true;
 
-        if (to - from < diff * 20 * 1000) {
-            alert('Range very small. reselect the range');
-            return;
+            var axisBreak = axis.axisBreaks.create();
+            axisBreak.startValue = arr[i][key];
+            axisBreak.endValue = arr[i + 1][key];
+            axisBreak.breakSize = 0.005;
+
+            var hoverState = axisBreak.states.create("hover");
+            hoverState.properties.breakSize = 1;
+            hoverState.properties.opacity = 0.1;
+            hoverState.transitionDuration = 1500;
+
+            axisBreak.defaultState.transitionDuration = 1000;
         }
-        else {
-            var text = '~ '+dom_from.find('input[type="number"]').val() +' '+dom_from.find('span').text()
-                + 's ago to ~ in '
-                + dom_to.find('input[type="number"]').val() +' '+ dom_to.find('span').text() + 's ago';            
-
-            go_from_to(from, to, text);
-        }
     }
-}
-
-function absolute_time_range() {
-    var from = $('#datetimepicker_from').data('DateTimePicker').date().toDate();
-    var to = $('#datetimepicker_to').data('DateTimePicker').date().toDate();
-
-    var text = from.toString().substr(0, from.toString().indexOf(' GMT'))
-                + ' ~ '
-                + to.toString().substr(0, to.toString().indexOf(' GMT')); 
-
-    from = from.getTime();
-    to = to.getTime();
-
-    var diff = Math.floor((to - from) / defaultZoomPoints / 1000);
-    diff = diff == 0 ? 1 : diff;
-
-    if (to - from < diff * 20 * 1000) {
-        alert('Choise correctly range value!');
-        return;
-    }
-    
-    go_from_to(from, to, text);
 }
 
 function callAPI(apiurl, from, to, interval, graph, day) {
+    L7_PROTO_NAME = [];
     if (env == 'test') {
         var sample_json = {
             "took": 34,
@@ -649,7 +281,6 @@ function callAPI(apiurl, from, to, interval, graph, day) {
                         "value": parseFloat(y)
                     }
                 });
-
             } else if (graph == "top5") {
                 for (var j = 0; j < 5; j++) {
                     y = Math.random() * 200000;
@@ -714,7 +345,8 @@ function callAPI(apiurl, from, to, interval, graph, day) {
                 apiurl: apiurl,
                 from: from,
                 to: to,
-                interval: interval
+                interval: interval,
+                addfilter: get_add_filter_format()
             },
             success: function (response) {
                 if (graph == "flow") {
@@ -731,41 +363,5 @@ function callAPI(apiurl, from, to, interval, graph, day) {
                 }
             }
         });
-    }
-}
-function create_axis_break(axis, arr, key) {
-    axis.axisBreaks.clear();
-
-    arr = arr.filter(function (a) {
-        return a[key];
-    });
-    arr = arr.sort(function (a, b) {
-        return (a[key] > b[key]) ? 1 : ((b[key] > a[key]) ? -1 : 0);
-    });
-
-    if(arr.length == 0) {
-        return false;
-    }
-    var total = arr[arr.length - 1][key] - arr[0][key];
-
-    for (var i = 0; i < arr.length - 1; i++) {
-        var diff = arr[i + 1][key] - arr[i][key];
-        if ((diff / total) >= axisBreakThreshold) {
-            axis.min = 0;
-            axis.max = arr[arr.length - 1][key] * 1.02;
-            axis.strictMinMax = true;
-
-            var axisBreak = axis.axisBreaks.create();
-            axisBreak.startValue = arr[i][key];
-            axisBreak.endValue = arr[i + 1][key];
-            axisBreak.breakSize = 0.005;
-
-            var hoverState = axisBreak.states.create("hover");
-            hoverState.properties.breakSize = 1;
-            hoverState.properties.opacity = 0.1;
-            hoverState.transitionDuration = 1500;
-
-            axisBreak.defaultState.transitionDuration = 1000;
-        }
     }
 }

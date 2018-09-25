@@ -60,11 +60,11 @@ chart_config.top5 = {
 
                 ttime_lab.text = dateFormatter.format(curDate, global_datetime_format);
                 if (data_top5[cPos]) {
-                    top5_tlab.text = "(Unknown)(" + data_top5[cPos]["value1"] + ")";
-                    top5_tlab1.text = '(Gentrice)(' + data_top5[cPos]["value2"] + ")";
-                    top5_tlab2.text = '(DNS)(' + data_top5[cPos]["value3"] + ")";
-                    top5_tlab3.text = '(Syslog)(' + data_top5[cPos]["value4"] + ")";
-                    top5_tlab4.text = '(SSL)(' + data_top5[cPos]["value5"] + ")";
+                    top5_tlab.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(255, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Unknown)(' + data_top5[cPos]['value1'] + ')</span>';
+                    top5_tlab1.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(10, 249, 113);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Gentrice)(' + data_top5[cPos]['value2'] + ')</span>';
+                    top5_tlab2.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(239, 255, 1);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(DNS)(' + data_top5[cPos]['value3'] + ')</span>';
+                    top5_tlab3.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(1, 35, 255);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Syslog)(' + data_top5[cPos]['value4'] + ')</span>';
+                    top5_tlab4.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(153, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(SSL)(' + data_top5[cPos]['value5'] + ')</span>';
                 }
                 curPos.x = ev.target.xPosition;
                 curPos.y = ev.target.yPosition;
@@ -124,17 +124,22 @@ function render_top5(response, day) {
     }
 
     data_top5 = [];
-    var res_top5 = response.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets;    
+    var res_top5 = response.aggregations.q.buckets['*']['L7_PROTO_NAME'].buckets;
+    L7_PROTO_NAME = [];
+    $.each(res_top5, function() {
+        L7_PROTO_NAME.push(this.key);
+    });
+
     var graph = res_top5[0].time_buckets.buckets;
     var all_values = [];
     // 
     var ts = 0;
-    if (_default_interval.indexOf('m') > -1) {
-        ts = 60 * parseInt(_default_interval.substr(0, _default_interval.length - 1)) * 1000;
-    } else if (_default_interval.indexOf('h') > -1) {
-        ts = 60 * 60 * parseInt(_default_interval.substr(0, _default_interval.length - 1)) * 1000;
+    if (defaultInterval.indexOf('m') > -1) {
+        ts = 60 * parseInt(defaultInterval.substr(0, defaultInterval.length - 1)) * 1000;
+    } else if (defaultInterval.indexOf('h') > -1) {
+        ts = 60 * 60 * parseInt(defaultInterval.substr(0, defaultInterval.length - 1)) * 1000;
     } else {
-        ts = parseInt(_default_interval.substr(0, _default_interval.length - 1)) * 1000;
+        ts = parseInt(defaultInterval.substr(0, defaultInterval.length - 1)) * 1000;
     }
 
     var interval = graph.length > 0 && graph[0].length >= 2 ? (graph[0][1].key - graph[0][0].key) / 1000 : ts;
@@ -152,19 +157,21 @@ function render_top5(response, day) {
     create_axis_break(chart_pool.top5.yAxes.getIndex(0), all_values, 'value');
     chart_pool.top5.data = data_top5;
     chart_pool.top5.series = [];
-    var color;
+    var colors = [
+        'rgb(255, 0, 0)',
+        'rgb(10, 249, 113)',
+        'rgb(239, 255, 1)',
+        'rgb(1, 35, 255)',
+        'rgb(153, 0, 0)'
+    ];
     for (var i = 0; i < res_top5.length; i++) {
-        color = randomColor({
-            luminosity: 'bright',
-            hue: 'hux'
-        });
         var series = chart_pool.top5.series.push(new am4charts.LineSeries());
         series.name = res_top5[i].key;
         series.dataFields.dateX = "date";
         series.dataFields.valueY = "value" + (i + 1);
         series.fillOpacity = "0.3";
-        series.stroke = color;
-        series.fill = color;
+        series.stroke = colors[i];
+        series.fill = colors[i];
     }
     ttime_lab = chart_pool.top5.createChild(am4core.Label);
     ttime_lab.text = "";
@@ -174,35 +181,35 @@ function render_top5(response, day) {
     ttime_lab.x = 130;
     ttime_lab.y = 30;
     top5_tlab = chart_pool.top5.createChild(am4core.Label);
-    top5_tlab.text = "(Unknown)";
+    top5_tlab.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(255, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Unknown)</span>';
     top5_tlab.fontSize = 15;
     top5_tlab.align = "center";
     top5_tlab.isMeasured = false;
     top5_tlab.x = 130;
     top5_tlab.y = 50;
     top5_tlab1 = chart_pool.top5.createChild(am4core.Label);
-    top5_tlab1.text = "(Gentrice)";
+    top5_tlab1.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(10, 249, 113);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Gentrice)</span>';
     top5_tlab1.fontSize = 15;
     top5_tlab1.align = "center";
     top5_tlab1.isMeasured = false;
     top5_tlab1.x = 130;
     top5_tlab1.y = 70;
     top5_tlab2 = chart_pool.top5.createChild(am4core.Label);
-    top5_tlab2.text = "(DNS)";
+    top5_tlab2.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(239, 255, 1);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(DNS)</span>';
     top5_tlab2.fontSize = 15;
     top5_tlab2.align = "center";
     top5_tlab2.isMeasured = false;
     top5_tlab2.x = 130;
     top5_tlab2.y = 90;
     top5_tlab3 = chart_pool.top5.createChild(am4core.Label);
-    top5_tlab3.text = "(Syslog)";
+    top5_tlab3.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(1, 35, 255);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Syslog)</span>';
     top5_tlab3.fontSize = 15;
     top5_tlab3.align = "center";
     top5_tlab3.isMeasured = false;
     top5_tlab3.x = 130;
     top5_tlab3.y = 110;
     top5_tlab4 = chart_pool.top5.createChild(am4core.Label);
-    top5_tlab4.text = "(SSL)";
+    top5_tlab4.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(153, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(SSL)</span>';
     top5_tlab4.fontSize = 15;
     top5_tlab4.align = "center";
     top5_tlab4.isMeasured = false;
