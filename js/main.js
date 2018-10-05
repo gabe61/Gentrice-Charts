@@ -236,6 +236,11 @@ function absolute_time_range() {
 }
 $(function() {
     $('body').addClass('minified');
+    $(document).click(function(e) {
+        if($(e.target).closest('#chart-filter-panel').is('article') !== true) {
+            $('#chart-filter-panel').hide(0);
+        }
+    });
     $('#chart-filter-panel').hide(0);
     //init filters
     var btn_panel = $('#add-filter-panel');
@@ -335,7 +340,9 @@ $(function() {
             $('#checkbox-'+graphId).prop('checked', true).trigger('change');
         });
     }
-    $('#btn-chart-filter').click(function() {
+    $('#btn-chart-filter').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         var container = $('#chart-filter-panel');
         if(container.css('display') === 'block') {
             container.hide(0);
@@ -433,7 +440,7 @@ $(function() {
     });
 
     //add filter
-    $('#filter-category, #filter-operator').select2();
+    $('#filter-category, #filter-operator, #transport').select2();
     $('#filter-category').on("select2:select", function(e) {
         var data = e.params.data;
         var exists_filter_data;
@@ -452,8 +459,23 @@ $(function() {
         if(filter_apply === false) {
             alert('Its filter already exists. so can\'t create filter');
         }
+        else {
+            var filter_role = '';
+            $('.filter-value-area').children('input,select').val('').trigger('change').css('display', 'none').each(function() {
+                filter_role = this.getAttribute('data-role');
+                if(filter_role.includes(data.id) === true) {
+                    if(data.id === 'transport') {
+                        $(this).next().css('display', 'block');
+                    }
+                    else {
+                        $(this).attr('placeholder', data.element.innerText).show(0)
+                        $('#transport').next().css('display', 'none');
+                    }
+                    return false;
+                }
+            });
+        }
     });
-    // $('#dialog-add-filter').modal('show');
 
     $('#add-filter-panel').on('mouseenter', 'button.btn', function(evt) {
         var that = $(this);
@@ -540,7 +562,7 @@ $(function() {
         var filterItem = btn.data('filter');
         $('#filter-category').val(filterItem.filter).trigger('change');
         $('#filter-operator').val(filterItem.oper).trigger('change');
-        $('#filter-value').val(filterItem.val).trigger('change');
+        get_value_from_role(filterItem.filter, 'dom').val(filterItem.val).trigger('change');
         $('#filter-label').val(filterItem.label);
 
         $('#dialog-add-filter').modal('show').data('edit', btn[0]);
@@ -549,6 +571,25 @@ $(function() {
         $('#shortcut-filter-trash').show();
     });
 });
+function get_value_from_role(id, type) {
+    var role = '';
+    var val = '';
+    $('.filter-value-area').children('input,select').each(function() {
+        role = this.getAttribute('data-role');
+        if(role) {
+            if(role.includes(id) === true) {
+                if(type === 'dom') {
+                    val = $(this);
+                }
+                else {
+                    val = $(this).val();
+                }
+                return false;
+            }
+        }
+    });
+    return val;
+}
 
 function filter_save() {
     if(filter_apply === false) {
@@ -557,7 +598,7 @@ function filter_save() {
     }
     var filter = $('#filter-category').val();
     var oper = $('#filter-operator').val();
-    var val = $('#filter-value').val().trim();
+    var val = get_value_from_role(filter);
     var label = $('#filter-label').val().trim();
 
     if(!filter) {
@@ -568,7 +609,7 @@ function filter_save() {
     }
     else if(val === '') {
         alert('please input filter value');
-        $('#filter-value').focus();
+        get_value_from_role(filter, 'dom').focus();
     }
     else if(!label) {
         alert('please input filter label!');
@@ -628,18 +669,18 @@ function filter_save() {
             btn.data('filter', filterData);
             $('#dialog-add-filter').modal('hide');
         }
+        //chart
+        allChartRefresh();
+        //table
+        allTableDataRefresh();
     }
-    //chart
-    allChartRefresh();
-    //table
-    allTableDataRefresh();
 }
 
 function open_new_filter() {
     $('#dialog-add-filter').removeData('edit');
     $('#filter-category').val('').trigger('change');
     $('#filter-operator').val('').trigger('change');
-    $('#filter-value').val('').trigger('change');
+    $('.filter-value-area').children('input,span').val('').trigger('change').hide(0);
     $('#filter-label').val('');
     $('#dialog-add-filter').modal('show');$('#add-filter-title').text('Add Filter');
     $('#shortcut-filter-trash').hide();
@@ -686,12 +727,15 @@ function shortcut_filter_trash() {
 }
 
 function get_add_filter_format() {
-    var filter_str = '';
+    var filter_arr = {};
     $('#add-filter-panel').children('button').each(function() {
         var filter_data = $(this).data('filter');
         if(filter_data && filter_data.disable !== true) {
-            filter_str += '&'+filter_data.filter+'='+filter_data.val;
+            filter_arr[filter_data.filter] = filter_data.val;
         }
     });
-    return filter_str;
+    if($.isEmptyObject(filter_arr) === false) {
+        return JSON.stringify(filter_arr);
+    }
+    return '';
 }

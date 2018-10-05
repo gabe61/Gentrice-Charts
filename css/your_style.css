@@ -64,3 +64,20 @@
     height: 15px;
     display: block;
 }
+/*filter*/
+.select2-results li {
+    padding: 7px 15px;
+}
+.select2-selection {
+    font-size: 14px;
+}
+.filter-value-area > * {
+    display: none;
+}
+#transport + span {
+    top: 0;
+    position: absolute !important;
+}
+.select2-results__options {
+    max-height: 140px !important;
+}

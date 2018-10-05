@@ -127,60 +127,62 @@ chart_config.in = {
     }
 };
 function render_in(response, day) {
-    response = JSON.parse(response);
-    if(!response.aggregations || response.aggregations.q.buckets['*'].time_buckets.buckets.length == 0) {
-        if(data_not_exists_alert == 'in') {
-            data_not_exists_alert = '';
-            alert('data is not exists');
+    try {
+        response = JSON.parse(response);
+        if(!response.aggregations || response.aggregations.q.buckets['*'].time_buckets.buckets.length == 0) {
+            if(data_not_exists_alert == 'in') {
+                data_not_exists_alert = '';
+                alert('data is not exists');
+            }
+            return false;
         }
-        return false;
-    }
-    data_in = [];
-    var res_in = response.aggregations.q.buckets['*'].time_buckets.buckets;
-    var interval = res_in.length >= 2 ? (res_in[1].key - res_in[0].key) / 1000 : default_interval;
-    if (day == "t") {
-        for (var i = 0; i < res_in.length; i++) {
-            data_in.push({
-                date1: new Date(res_in[i].key),
-                value1: bytes_to_bps(res_in[i]["sum(IN_BYTES)"].value, interval)
-            });
+        data_in = [];
+        var res_in = response.aggregations.q.buckets['*'].time_buckets.buckets;
+        var interval = res_in.length >= 2 ? (res_in[1].key - res_in[0].key) / 1000 : default_interval;
+        if (day == "t") {
+            for (var i = 0; i < res_in.length; i++) {
+                data_in.push({
+                    date1: new Date(res_in[i].key),
+                    value1: bytes_to_bps(res_in[i]["sum(IN_BYTES)"].value, interval)
+                });
+            }
+            create_axis_break(chart_pool.in.yAxes.getIndex(0), data_in, 'value1');
+        } else {
+            for (var i = 0; i < res_in.length; i++) {
+                data_in.push({
+                    date2: new Date(res_in[i].key),
+                    value2: bytes_to_bps(res_in[i]["sum(IN_BYTES)"].value, interval)
+                });
+            }
+            create_axis_break(chart_pool.in.yAxes.getIndex(0), data_in, 'value2');
         }
-        create_axis_break(chart_pool.in.yAxes.getIndex(0), data_in, 'value1');
-    } else {
-        for (var i = 0; i < res_in.length; i++) {
-            data_in.push({
-                date2: new Date(res_in[i].key),
-                value2: bytes_to_bps(res_in[i]["sum(IN_BYTES)"].value, interval)
-            });
-        }
-        create_axis_break(chart_pool.in.yAxes.getIndex(0), data_in, 'value2');
-    }
 
-    var title_txt = window.localStorage.getItem('range_current_text');
-    chart_pool.in.data = data_in;
-    itime_lab = chart_pool.in.createChild(am4core.Label);
-    itime_lab.text = "";
-    itime_lab.fontSize = 15;
-    itime_lab.align = "center";
-    itime_lab.isMeasured = false;
-    itime_lab.x = 130;
-    itime_lab.y = 30;
-    in_tlab = chart_pool.in.createChild(am4core.Label);
-    in_tlab.text = (title_txt ? title_txt : "Today");
-    in_tlab.fontSize = 15;
-    in_tlab.align = "center";
-    in_tlab.isMeasured = false;
-    in_tlab.x = 130;
-    in_tlab.y = 50;
-    in_ylab = chart_pool.in.createChild(am4core.Label);
-    in_ylab.text = "";
-    in_ylab.fontSize = 15;
-    in_ylab.align = "center";
-    in_ylab.isMeasured = false;
-    in_ylab.x = 130;
-    in_ylab.y = 70;
+        var title_txt = window.localStorage.getItem('range_current_text');
+        chart_pool.in.data = data_in;
+        itime_lab = chart_pool.in.createChild(am4core.Label);
+        itime_lab.text = "";
+        itime_lab.fontSize = 15;
+        itime_lab.align = "center";
+        itime_lab.isMeasured = false;
+        itime_lab.x = 130;
+        itime_lab.y = 30;
+        in_tlab = chart_pool.in.createChild(am4core.Label);
+        in_tlab.text = (title_txt ? title_txt : "Today");
+        in_tlab.fontSize = 15;
+        in_tlab.align = "center";
+        in_tlab.isMeasured = false;
+        in_tlab.x = 130;
+        in_tlab.y = 50;
+        in_ylab = chart_pool.in.createChild(am4core.Label);
+        in_ylab.text = "";
+        in_ylab.fontSize = 15;
+        in_ylab.align = "center";
+        in_ylab.isMeasured = false;
+        in_ylab.x = 130;
+        in_ylab.y = 70;
 
-    setTimeout(function() {
-        $('#chart_in').hide(0).show(0);
-    }, 200);
+        setTimeout(function() {
+            $('#chart_in').hide(0).show(0);
+        }, 200);
+    } catch(e) {}
 }

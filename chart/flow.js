@@ -135,64 +135,69 @@ chart_config.flow = {
 };
 
 function render_flow(response, day) {
-    response = JSON.parse(response);
-    if(!response.aggregations || response.aggregations.q.buckets['*'].time_buckets.buckets.length == 0) {
-        if(data_not_exists_alert == 'flow') {
-            data_not_exists_alert = '';
-            alert('data is not exists');
+    try {
+        response = JSON.parse(response);
+        if(!response.aggregations || response.aggregations.q.buckets['*'].time_buckets.buckets.length == 0) {
+            if(data_not_exists_alert == 'flow') {
+                data_not_exists_alert = '';
+                alert('data is not exists');
+            }
+            return false;
         }
-        return false;
+        var res_flow = response.aggregations.q.buckets['*'].time_buckets.buckets;
+
+        data_flow = [];
+        if (day == "t") {
+            for (var i = 0; i < res_flow.length; i++) {
+                data_flow.push({
+                    date1: new Date(res_flow[i].key),
+                    value1: res_flow[i].count.value
+                });
+            }
+            create_axis_break(chart_pool.flow.yAxes.getIndex(0), data_flow, 'value1');
+        } else {
+            for (var i = 0; i < res_flow.length; i++) {
+                data_flow.push({
+                    date2: new Date(res_flow[i].key),
+                    value2: res_flow[i].count.value
+                });
+            }
+            create_axis_break(chart_pool.flow.yAxes.getIndex(0), data_flow, 'value2');
+        }
+
+        var title_txt = window.localStorage.getItem('range_current_text');
+
+        chart_pool.flow.data = data_flow;
+
+        ftime_lab = chart_pool.flow.createChild(am4core.Label);
+        ftime_lab.text = "";
+        ftime_lab.fontSize = 15;
+        ftime_lab.align = "center";
+        ftime_lab.isMeasured = false;
+        ftime_lab.x = 80;
+        ftime_lab.y = 30;
+        flow_tlab = chart_pool.flow.createChild(am4core.Label);
+        flow_tlab.text = (title_txt ? title_txt : "Today");
+        flow_tlab.fontSize = 15;
+        flow_tlab.align = "center";
+        flow_tlab.isMeasured = false;
+        flow_tlab.x = 80;
+        flow_tlab.y = 50;
+        flow_ylab = chart_pool.flow.createChild(am4core.Label);
+        flow_ylab.text = "";
+        flow_ylab.fontSize = 15;
+        flow_ylab.align = "center";
+        flow_ylab.isMeasured = false;
+        flow_ylab.x = 80;
+        flow_ylab.y = 70;
+
+        setTimeout(function() {
+            $('#chart_flow').hide(0).show(0);
+        }, 200);
     }
-    var res_flow = response.aggregations.q.buckets['*'].time_buckets.buckets;
-
-    data_flow = [];
-    if (day == "t") {
-        for (var i = 0; i < res_flow.length; i++) {
-            data_flow.push({
-                date1: new Date(res_flow[i].key),
-                value1: res_flow[i].count.value
-            });
-        }
-        create_axis_break(chart_pool.flow.yAxes.getIndex(0), data_flow, 'value1');
-    } else {
-        for (var i = 0; i < res_flow.length; i++) {
-            data_flow.push({
-                date2: new Date(res_flow[i].key),
-                value2: res_flow[i].count.value
-            });
-        }
-        create_axis_break(chart_pool.flow.yAxes.getIndex(0), data_flow, 'value2');
+    catch(exception) {
+        
     }
-
-    var title_txt = window.localStorage.getItem('range_current_text');
-
-    chart_pool.flow.data = data_flow;
-
-    ftime_lab = chart_pool.flow.createChild(am4core.Label);
-    ftime_lab.text = "";
-    ftime_lab.fontSize = 15;
-    ftime_lab.align = "center";
-    ftime_lab.isMeasured = false;
-    ftime_lab.x = 80;
-    ftime_lab.y = 30;
-    flow_tlab = chart_pool.flow.createChild(am4core.Label);
-    flow_tlab.text = (title_txt ? title_txt : "Today");
-    flow_tlab.fontSize = 15;
-    flow_tlab.align = "center";
-    flow_tlab.isMeasured = false;
-    flow_tlab.x = 80;
-    flow_tlab.y = 50;
-    flow_ylab = chart_pool.flow.createChild(am4core.Label);
-    flow_ylab.text = "";
-    flow_ylab.fontSize = 15;
-    flow_ylab.align = "center";
-    flow_ylab.isMeasured = false;
-    flow_ylab.x = 80;
-    flow_ylab.y = 70;
-
-    setTimeout(function() {
-        $('#chart_flow').hide(0).show(0);
-    }, 200);
 }
 // chart_pool.flow.dataSource.events.on("parseended", function(ev) {
 //     console.log(ev);

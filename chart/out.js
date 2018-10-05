@@ -127,60 +127,62 @@ chart_config.out = {
 };
 
 function render_out(response, day) {
-    response = JSON.parse(response);
-    if(!response.aggregations || response.aggregations.q.buckets['*'].time_buckets.buckets.length == 0) {
-        if(data_not_exists_alert == 'out') {
-            data_not_exists_alert = '';
-            alert('data is not exists');
+    try {
+        response = JSON.parse(response);
+        if(!response.aggregations || response.aggregations.q.buckets['*'].time_buckets.buckets.length == 0) {
+            if(data_not_exists_alert == 'out') {
+                data_not_exists_alert = '';
+                alert('data is not exists');
+            }
+            return false;
         }
-        return false;
-    }
-    var res_out = response.aggregations.q.buckets['*'].time_buckets.buckets;
-    data_out = [];
-    var interval = res_out.length >= 2 ? (res_out[1].key - res_out[0].key) / 1000 : default_interval;
-    if (day == "t") {
-        for (var i = 0; i < res_out.length; i++) {
-            data_out.push({
-                date1: new Date(res_out[i].key),
-                value1: bytes_to_bps(res_out[i]["sum(OUT_BYTES)"].value, interval)
-            });
+        var res_out = response.aggregations.q.buckets['*'].time_buckets.buckets;
+        data_out = [];
+        var interval = res_out.length >= 2 ? (res_out[1].key - res_out[0].key) / 1000 : default_interval;
+        if (day == "t") {
+            for (var i = 0; i < res_out.length; i++) {
+                data_out.push({
+                    date1: new Date(res_out[i].key),
+                    value1: bytes_to_bps(res_out[i]["sum(OUT_BYTES)"].value, interval)
+                });
+            }
+            create_axis_break(chart_pool.out.yAxes.getIndex(0), data_out, 'value1');
+        } else {
+            for (var i = 0; i < res_out.length; i++) {
+                data_out.push({
+                    date2: new Date(res_out[i].key),
+                    value2: bytes_to_bps(res_out[i]["sum(OUT_BYTES)"].value, interval)
+                });
+            }
+            create_axis_break(chart_pool.out.yAxes.getIndex(0), data_out, 'value2');
         }
-        create_axis_break(chart_pool.out.yAxes.getIndex(0), data_out, 'value1');
-    } else {
-        for (var i = 0; i < res_out.length; i++) {
-            data_out.push({
-                date2: new Date(res_out[i].key),
-                value2: bytes_to_bps(res_out[i]["sum(OUT_BYTES)"].value, interval)
-            });
-        }
-        create_axis_break(chart_pool.out.yAxes.getIndex(0), data_out, 'value2');
-    }
-    chart_pool.out.data = data_out;
+        chart_pool.out.data = data_out;
 
-    var title_txt = window.localStorage.getItem('range_current_text');
-    otime_lab = chart_pool.out.createChild(am4core.Label);
-    otime_lab.text = "";
-    otime_lab.fontSize = 15;
-    otime_lab.align = "center";
-    otime_lab.isMeasured = false;
-    otime_lab.x = 130;
-    otime_lab.y = 30;
-    out_tlab = chart_pool.out.createChild(am4core.Label);
-    out_tlab.text = (title_txt ? title_txt : "Today");
-    out_tlab.fontSize = 15;
-    out_tlab.align = "center";
-    out_tlab.isMeasured = false;
-    out_tlab.x = 130;
-    out_tlab.y = 50;
-    out_ylab = chart_pool.out.createChild(am4core.Label);
-    out_ylab.text = "";
-    out_ylab.fontSize = 15;
-    out_ylab.align = "center";
-    out_ylab.isMeasured = false;
-    out_ylab.x = 130;
-    out_ylab.y = 70;
+        var title_txt = window.localStorage.getItem('range_current_text');
+        otime_lab = chart_pool.out.createChild(am4core.Label);
+        otime_lab.text = "";
+        otime_lab.fontSize = 15;
+        otime_lab.align = "center";
+        otime_lab.isMeasured = false;
+        otime_lab.x = 130;
+        otime_lab.y = 30;
+        out_tlab = chart_pool.out.createChild(am4core.Label);
+        out_tlab.text = (title_txt ? title_txt : "Today");
+        out_tlab.fontSize = 15;
+        out_tlab.align = "center";
+        out_tlab.isMeasured = false;
+        out_tlab.x = 130;
+        out_tlab.y = 50;
+        out_ylab = chart_pool.out.createChild(am4core.Label);
+        out_ylab.text = "";
+        out_ylab.fontSize = 15;
+        out_ylab.align = "center";
+        out_ylab.isMeasured = false;
+        out_ylab.x = 130;
+        out_ylab.y = 70;
 
-    setTimeout(function() {
-        $('#chart_out').hide(0).show(0);
-    }, 200);
+        setTimeout(function() {
+            $('#chart_out').hide(0).show(0);
+        }, 200);
+    } catch(e) {}
 }
