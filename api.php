@@ -4,6 +4,12 @@
     $tto = $_GET["to"];
     $itv = $_GET["interval"];
     $addFilter = $_GET['addfilter'];
-    $response = file_get_contents($apiurl."?from=".$tfrom."&to=".$tto."&interval=".$itv.'&filter='.$addFilter);
+    if($addfilter) {
+    	$addfilter = '&filter='.$addFilter;
+    }
+    else {
+    	$addfilter = '';
+    }
+    $response = file_get_contents($apiurl."?from=".$tfrom."&to=".$tto."&interval=".$itv.$addfilter);
     // $response = file_get_contents($apiurl);
     echo $response;
