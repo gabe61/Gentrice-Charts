@@ -308,10 +308,10 @@ function render_pool($type = 'chart') {
                                 <select id="filter-category" class="form-control" data-placeholder="Fields...">
                                     <option value=""></option>
                                     <option value="ip">IP</option>
-                                    <option value="ip4_src">IPV4_SRC</option>
-                                    <option value="ip6_src">IPV6_SRC</option>
-                                    <option value="ip4_dst">IPV4_DST</option>
-                                    <option value="ip6_dst">IPV6_DST</option>
+                                    <option value="ipv4_src">IPV4_SRC</option>
+                                    <option value="ipv6_src">IPV6_SRC</option>
+                                    <option value="ipv4_dst">IPV4_DST</option>
+                                    <option value="ipv6_dst">IPV6_DST</option>
                                     <option value="src_port">SRC_PORT</option>
                                     <option value="dst_port">DST_PORT</option>
                                     <option value="transport">Transport</option>
@@ -324,7 +324,7 @@ function render_pool($type = 'chart') {
                                 </select>
                             </div>
                             <div class="col-md-3 filter-value-area">
-                                <input id="filter-value" class="form-control" placeholder="IP address" data-role="ip,ip4_src,ip6_src,ip4_dst,ip6_dst,src_port,dst_port" />
+                                <input id="filter-value" class="form-control" placeholder="IP address" data-role="ipv4_src,ipv6_src,ipv4_dst,ipv6_dst,src_port,dst_port" />
                                 <select class="form-control" data-placeholder="Transport..." id="transport" data-role="transport">
                                     <option value=""></option>
                                     <option value="1">ICMP</option>
