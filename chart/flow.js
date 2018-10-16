@@ -84,7 +84,7 @@ chart_config.flow = {
 
                 if(data_flow[cPos]) {
                     var title_txt = window.localStorage.getItem('range_current_text');
-                    flow_tlab.text = (title_txt ? title_txt : "Today") + "(" + data_flow[cPos]["value1"] + ")";
+                    flow_tlab.text = (title_txt ? title_txt : "Today") + "(" + (data_flow[cPos]["value1"] ? data_flow[cPos]["value1"].toFixed(3) : 0) + ")";
                 }
                                 
                 curPos.x = ev.target.xPosition;

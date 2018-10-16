@@ -60,11 +60,11 @@ chart_config.top5 = {
 
                 ttime_lab.text = dateFormatter.format(curDate, global_datetime_format);
                 if (data_top5[cPos]) {
-                    top5_tlab.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(255, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Unknown)(' + data_top5[cPos]['value1'] + ')</span>';
-                    top5_tlab1.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(10, 249, 113);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Gentrice)(' + data_top5[cPos]['value2'] + ')</span>';
-                    top5_tlab2.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(239, 255, 1);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(DNS)(' + data_top5[cPos]['value3'] + ')</span>';
-                    top5_tlab3.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(1, 35, 255);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Syslog)(' + data_top5[cPos]['value4'] + ')</span>';
-                    top5_tlab4.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(153, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(SSL)(' + data_top5[cPos]['value5'] + ')</span>';
+                    top5_tlab.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(255, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Unknown)(' + (data_top5[cPos]['value1'] ? data_top5[cPos]['value1'].toFixed(3) : 0) + ')</span>';
+                    top5_tlab1.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(10, 249, 113);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Gentrice)(' + (data_top5[cPos]['value2'] ? data_top5[cPos]['value2'].toFixed(3) : 0) + ')</span>';
+                    top5_tlab2.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(239, 255, 1);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(DNS)(' + (data_top5[cPos]['value3'] ? data_top5[cPos]['value3'].toFixed(3) : 0) + ')</span>';
+                    top5_tlab3.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(1, 35, 255);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(Syslog)(' + (data_top5[cPos]['value4'] ? data_top5[cPos]['value4'].toFixed(3) : 0) + ')</span>';
+                    top5_tlab4.html = '<svg width="50" height="12"><rect width="12" height="12" style="fill:rgb(153, 0, 0);stroke-width:3;stroke:rgb(0,0,0)" /></svg><span>(SSL)(' + (data_top5[cPos]['value5'] ? data_top5[cPos]['value5'].toFixed(3) : 0) + ')</span>';
                 }
                 curPos.x = ev.target.xPosition;
                 curPos.y = ev.target.yPosition;

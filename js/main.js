@@ -196,20 +196,15 @@ function time_range_render_chart() {
         alert('Invalid time range.');
     }
     else {
-        var diff = Math.floor((to - from) / defaultZoomPoints / 1000);
-        diff = diff == 0 ? 1 : diff;
-
-        if (to - from < diff * 20 * 1000) {
-            alert('Range very small. reselect the range');
+        if (to - from < 1000) {
+            alert('Time range must be at least 1 second.');
             return;
         }
-        else {
-            var text = '~ '+dom_from.find('input[type="number"]').val() +' '+dom_from.find('span').text()
+        var text = '~ '+dom_from.find('input[type="number"]').val() +' '+dom_from.find('span').text()
                 + 's ago to ~ in '
                 + dom_to.find('input[type="number"]').val() +' '+ dom_to.find('span').text() + 's ago';
 
-            go_from_to(from, to, text);
-        }
+        go_from_to(from, to, text);
     }
 }
 
@@ -223,12 +218,8 @@ function absolute_time_range() {
 
     from = from.getTime();
     to = to.getTime();
-
-    var diff = Math.floor((to - from) / defaultZoomPoints / 1000);
-    diff = diff == 0 ? 1 : diff;
-
-    if (to - from < diff * 20 * 1000) {
-        alert('Choise correctly range value!');
+    if (to - from < 1000) {
+        alert('Time range must be at least 1 second.');
         return;
     }
 

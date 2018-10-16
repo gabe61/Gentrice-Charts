@@ -77,7 +77,9 @@ function chart_create(chart_id) {
         });
     }
     else {
-        __chart_create(chart_id);
+        setTimeout(function() {
+            __chart_create(chart_id);
+        });
     }
 }
 function __chart_create(chart_id) {
@@ -87,18 +89,17 @@ function __chart_create(chart_id) {
 
 function zoomIn(from, to) {
     setTimeout(function() {
-        if (!from) {
+        if (!from || !to) {
+            return;
+        }
+        if (to - from < 1000) {
+            alert('Time range must be at least 1 second.');
             return;
         }
         defaultInterval = Math.floor((to - from) / defaultZoomPoints / 1000);
         defaultInterval = defaultInterval == 0 ? 1 : defaultInterval;
         default_from = from;
         default_to = to;
-
-        if (to - from < defaultInterval * 20 * 1000) {
-            alert('Range very small. reselect the range');
-            return;
-        }
 
         if (defaultInterval < 60) {
             defaultInterval = defaultInterval + 's';
