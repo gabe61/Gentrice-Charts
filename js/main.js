@@ -225,36 +225,7 @@ function absolute_time_range() {
 
     go_from_to(from, to, text);
 }
-$(function() {
-    $('body').addClass('minified');
-    $(document).click(function(e) {
-        if($(e.target).closest('#chart-filter-panel').is('article') !== true) {
-            $('#chart-filter-panel').hide(0);
-        }
-    });
-    $('#chart-filter-panel').hide(0);
-    //init filters
-    var btn_panel = $('#add-filter-panel');
-    var filters = window.localStorage.getItem('filters');
-    if(filters) {
-        filters = JSON.parse(filters);
-        $.each(filters, function() {
-            var btn = $('<button class="btn '+(this.disable === true ? 'disabled btn-danger' : 'btn-primary')+' filter-item"><i class="fa fa-thumb-tack"></i> '+this.label+'</button>').appendTo(btn_panel);
-
-            btn.popover({
-                content: '<div class="btn-group">\n' +
-                    '            <button class="btn btn-primary toolbar-pin"><i class="fa fa-thumb-tack"></i></button>\n' +
-                    '            <button class="btn btn-primary toolbar-disable-enable"><i class="fa '+(this.disable === true ? 'fa-ban' : 'fa-circle-o')+'"></i></button>\n' +
-                    '            <button class="btn btn-primary toolbar-trash"><i class="fa fa-trash"></i></button>\n' +
-                    '            <button class="btn btn-primary toolbar-edit"><i class="fa fa-edit"></i></button>\n' +
-                    '         </div>',
-                placement: 'bottom',
-                html: true
-            });
-
-            btn.data('filter', this);
-        });
-    }
+function clearSelection() {
     var current_range = window.localStorage.getItem('range_current');
     if(current_range) {
         if(current_range.indexOf('{"') === -1) {
@@ -279,7 +250,45 @@ $(function() {
         $('#btn-chart-filter').text(window.localStorage.getItem('range_current_text'));
     }
     else set_category_time_range('today');
+}
+$(function() {
+    $('body').addClass('minified');
+    $(document).click(function(e) {
+        if($(e.target).closest('#chart-filter-panel').is('article') !== true) {
+            $('#chart-filter-panel').hide(0);
+        }
+    });
+    $('#btn-clear-selection').click(function() {
+        clearSelection();
+        //chart
+        allChartRefresh();
+        //table
+        allTableDataRefresh();
+    });
+    $('#chart-filter-panel').hide(0);
+    //init filters
+    var btn_panel = $('#add-filter-panel');
+    var filters = window.localStorage.getItem('filters');
+    if(filters) {
+        filters = JSON.parse(filters);
+        $.each(filters, function() {
+            var btn = $('<button class="btn '+(this.disable === true ? 'disabled btn-danger' : 'btn-primary')+' filter-item"><i class="fa fa-thumb-tack"></i> '+this.label+'</button>').appendTo(btn_panel);
 
+            btn.popover({
+                content: '<div class="btn-group">\n' +
+                    '            <button class="btn btn-primary toolbar-pin"><i class="fa fa-thumb-tack"></i></button>\n' +
+                    '            <button class="btn btn-primary toolbar-disable-enable"><i class="fa '+(this.disable === true ? 'fa-ban' : 'fa-circle-o')+'"></i></button>\n' +
+                    '            <button class="btn btn-primary toolbar-trash"><i class="fa fa-trash"></i></button>\n' +
+                    '            <button class="btn btn-primary toolbar-edit"><i class="fa fa-edit"></i></button>\n' +
+                    '         </div>',
+                placement: 'bottom',
+                html: true
+            });
+
+            btn.data('filter', this);
+        });
+    }
+    clearSelection();
     //generate recents
     set_recent_category();
 

@@ -114,6 +114,7 @@ function render_pool($type = 'chart') {
 			</div>
 			<div class="col-xs-12 col-sm-5 col-md-5 col-lg-8">
                 <div class="ml-auto pull-right">
+                    <button type="button" class="btn btn-danger btn-lg" id="btn-clear-selection">Clear Selection</button>
                     <button type="button" class="btn btn-info btn-lg" id="btn-chart-filter">Today</button>
                     <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#chart-type-container">Select Graph</button>
                     <div id="chart-type-container" class="modal fade" role="dialog" aria-hidden="true">
