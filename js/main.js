@@ -677,6 +677,7 @@ function filter_save() {
 }
 
 function open_new_filter() {
+    $('#chart-widgets-container').hide();
     $('#dialog-add-filter').removeData('edit');
     $('#filter-category').val('').trigger('change');
     $('#filter-operator').val('').trigger('change');
@@ -684,6 +685,10 @@ function open_new_filter() {
     $('#filter-label').val('');
     $('#dialog-add-filter').modal('show');$('#add-filter-title').text('Add Filter');
     $('#shortcut-filter-trash').hide();
+    $('#dialog-add-filter').on('hidden.bs.modal', function () {
+        // do something…
+        $('#chart-widgets-container').show();
+    })
 }
 
 function saveFilter(filter, update) {
