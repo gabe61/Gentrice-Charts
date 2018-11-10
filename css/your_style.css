@@ -79,5 +79,5 @@
     position: absolute !important;
 }
 .select2-results__options {
-    max-height: 140px !important;
+    max-height: 300px !important;
 }
